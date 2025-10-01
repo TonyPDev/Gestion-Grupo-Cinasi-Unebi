@@ -8,9 +8,17 @@ function Form({ route, method }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("");
   const navigate = useNavigate();
 
   const name = method === "login" ? "Iniciar Sesión" : "Registrarse";
+  const datos = {
+    username,
+    password,
+  };
+  if (method === "register") {
+    datos.role = role;
+  }
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -22,7 +30,7 @@ function Form({ route, method }) {
         localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
         navigate("/");
       } else {
-        navigate("/login");
+        navigate("/admin/gestion-usuarios");
       }
     } catch (error) {
       alert(error);
@@ -49,6 +57,24 @@ function Form({ route, method }) {
         placeholder="Contraseña"
         autoComplete={method === "login" ? "current-password" : "new-password"}
       />
+      {/*Renderizado condicional del selector de rol */}
+      {method === "register" && (
+        <div className="form-group">
+          <label htmlFor="role-select">Rol:</label>
+          <select
+            id="role-select"
+            className="form-input"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="CLINICA">Clínica</option>
+            <option value="ADMINISTRACION">Administración</option>
+            <option value="COMERCIAL">Comercial</option>
+            <option value="TI">TI</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+      )}
       <button className="form-button" type="submit">
         {name}
       </button>

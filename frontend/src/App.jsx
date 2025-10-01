@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
+import UserManagement from "./pages/UserManagement";
 
 function Logout() {
   localStorage.clear();
@@ -25,6 +26,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/gestion-usuarios"
+          element={
+            <ProtectedRoute allowedRoles={["TI"]}>
+              <UserManagement />
             </ProtectedRoute>
           }
         />
