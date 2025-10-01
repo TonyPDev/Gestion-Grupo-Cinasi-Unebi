@@ -30,6 +30,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['username'] = user.username
+        token['user_id'] = user.id
         try:
             token['role'] = user.profile.role
         except user._meta.model.profile.RelatedObjectDoesNotExist:
@@ -52,10 +53,20 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'profile']
 
     def update(self, instance, validated_data):
+        # El usuario que hace la petición (el admin logueado)
+        request_user = self.context['request'].user
         # Obtenemos los datos del perfil del JSON de entrada
         profile_data = validated_data.pop('profile')
+        new_role = profile_data.get('role')
         # Obtenemos el perfil del usuario a actualizar
-        profile = instance.profile
+
+        # Si el usuario que se está editando (instance) es el mismo que está logueado (request_user)
+        # Y está intentando quitarse el rol de ADMIN o TI.
+        if instance == request_user and new_role not in ['ADMIN']:
+            # Lanzamos un error de validación que será enviado al frontend
+            raise serializers.ValidationError({"detail": "No puedes quitarte tu propio rol de administrador."})
+
+        profile, created = Profile.objects.get_or_create(user=instance)
 
         # Actualizamos el usuario (si se cambian otros campos como username)
         instance.username = validated_data.get('username', instance.username)
