@@ -10,7 +10,12 @@ export const useAuth = () => {
 
   try {
     const decoded = jwtDecode(token);
-    return { isAuth: true, role: decoded.role, username: decoded.username };
+    return {
+      isAuth: true,
+      role: decoded.role,
+      username: decoded.username,
+      userId: decoded.user_id,
+    };
   } catch (e) {
     console.error("Token inválido:", e);
     return { isAuth: false, role: null, username: null };

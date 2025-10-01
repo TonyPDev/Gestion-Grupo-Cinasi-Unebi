@@ -13,7 +13,7 @@ function Home() {
 
       {/* Renderizado condicional basado en el rol */}
       {role === "CLINICA" && <ClinicaDashboard />}
-      {role === "TI" && <TIDashboard />}
+      {role === "TI" || ("ADMIN" && <TIDashboard />)}
 
       {/* Agrega más condiciones para otros roles */}
       {role !== "CLINICA" && role !== "TI" && (

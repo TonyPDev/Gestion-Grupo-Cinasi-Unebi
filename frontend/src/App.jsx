@@ -32,14 +32,21 @@ function App() {
         <Route
           path="/admin/gestion-usuarios"
           element={
-            <ProtectedRoute allowedRoles={["TI"]}>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <UserManagement />
             </ProtectedRoute>
           }
         />
         <Route path="/login" element={<Login />}></Route>
         <Route path="/logout" element={<Logout />}></Route>
-        <Route path="/register" element={<RegisterAndLogout />}></Route>
+        <Route
+          path="/register"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>

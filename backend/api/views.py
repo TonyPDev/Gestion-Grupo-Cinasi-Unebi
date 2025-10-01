@@ -11,7 +11,7 @@ from .permissions import *
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
 class NoteListCreate (generics.ListCreateAPIView):
     serializer_class = NoteSerializer
@@ -40,7 +40,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 class VistaClinica(generics.ListAPIView):
-    permission_classes = [IsAuthenticated, (IsClinicaUser)]
+    permission_classes = [IsAuthenticated, (IsClinicaUser | IsAdminUser)]
 
 class VistaTI(generics.ListAPIView):
     permission_classes = [IsAuthenticated, (IsTIUser | IsAdminUser)]
