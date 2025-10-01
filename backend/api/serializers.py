@@ -46,7 +46,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 # Serializer para el perfil (al listar/editar)
 class ProfileSerializer(serializers.ModelSerializer):
-    roles = serializers.StringRelatedField(many=True)
+    roles = serializers.SlugRelatedField(
+        many=True,
+        slug_field='name',
+        queryset=Role.objects.all()
+    )
+
     class Meta:
         model = Profile
         fields = ['roles']
@@ -54,6 +59,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 # Serializer para listar y actualizar usuarios
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
+
     class Meta:
         model = User
         fields = ['id', 'username', 'profile']
@@ -61,24 +67,21 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # El usuario que hace la petición (el admin logueado)
         request_user = self.context['request'].user
-        # Obtenemos los datos del perfil del JSON de entrada
-        profile_data = validated_data.pop('profile')
-        new_roles_names = profile_data.get('roles')
+        
+        # Obtenemos los datos del perfil del JSON ya validado
+        profile_data = validated_data.pop('profile', None)
+        
+        # Si se enviaron datos del perfil, procedemos a actualizar los roles
+        if profile_data:
+            new_roles = profile_data.get('roles')
 
-        #Se comprueba si se está intentando modificar los roles
-        if new_roles_names is not None:
-            #Si el usuario que está editando es el admin logueado y está intentando quitarse su propio rol de admin
-            if instance == request_user and 'ADMIN' not in new_roles_names:
-                raise serializers.ValidationError({"detail": "No puedes quitarte tu rol de admin"})
+            # Si el usuario que se edita es el mismo que está logueado y se está quitando el rol de ADMIN
+            if instance == request_user and not any(role.name == 'ADMIN' for role in new_roles):
+                raise serializers.ValidationError({"detail": "No puedes quitarte tu propio rol de ADMIN."})
 
-        profile, created = Profile.objects.get_or_create(user=instance)
+            # Obtenemos o creamos el perfil y le asignamos los nuevos roles
+            profile, created = Profile.objects.get_or_create(user=instance)
+            profile.roles.set(new_roles)
 
-        # Actualizamos el usuario (si se cambian otros campos como username)
-        instance.username = validated_data.get('username', instance.username)
-        instance.save()
-
-        # Actualizamos roles
-        if new_roles_names is not None:
-            roles = Role.object.filter(name__in = new_roles_names)
-            profile.set(roles)
+        # Finalmente, actualizamos el resto de los campos del usuario, como el username
         return super().update(instance, validated_data)
