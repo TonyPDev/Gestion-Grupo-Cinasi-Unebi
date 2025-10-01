@@ -22,13 +22,13 @@ function ProtectedRoute({ children, allowedRoles }) {
         localStorage.setItem(ACCES_TOKEN, res.data.access);
         // Después de refrescar, decodificamos el NUEVO token para verificar el rol.
         const decoded = jwtDecode(res.data.access);
-        const userRole = decoded.role;
-        // Verificamos si la ruta tiene roles permitidos y si el usuario cumple.
-        if (allowedRoles && !allowedRoles.includes(userRole)) {
-          setIsAuthorized(false); // No tiene el rol permitido
-        } else {
-          setIsAuthorized(true); // Tiene el rol o la ruta no especifica roles
-        }
+        const userRoles = decoded.roles || []; //Esto es para los múltiples roles
+        /// Comprueba si el usuario tiene al menos UNO de los roles permitidos.
+        // Si no se especifican 'allowedRoles', se permite el acceso.
+        const hasPermission = allowedRoles
+          ? allowedRoles.some((allowed) => userRoles.includes(allowed))
+          : true;
+        setIsAuthorized(hasPermission);
       } else {
         setIsAuthorized(false);
       }
@@ -51,12 +51,12 @@ function ProtectedRoute({ children, allowedRoles }) {
       await refreshToken();
     } else {
       // Si el token es válido, verificamos el rol.
-      const userRole = decoded.role;
-      if (allowedRoles && !allowedRoles.includes(userRole)) {
-        setIsAuthorized(false); // No tiene el rol permitido
-      } else {
-        setIsAuthorized(true); // Tiene el rol o la ruta no especifica roles
-      }
+      const userRoles = decoded.roles || [];
+      const hasPermission = allowedRoles
+        ? allowedRoles.some((allowed) => userRoles.includes(allowed))
+        : true;
+
+      setIsAuthorized(hasPermission);
     }
   };
 

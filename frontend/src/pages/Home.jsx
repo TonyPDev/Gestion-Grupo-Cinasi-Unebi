@@ -2,6 +2,8 @@ import { useAuth } from "../hooks/useAuth";
 // Supongamos que tienes componentes para cada dashboard
 import ClinicaDashboard from "../components/ClinicaDashboard";
 import TIDashboard from "../components/TIDashboard";
+import AdministracionDashboard from "../components/AdministracionDashboard";
+import ComercialDashboard from "../components/ComercialDashboard";
 
 function Home() {
   const { role, username } = useAuth();
@@ -12,13 +14,14 @@ function Home() {
       <h2>Dashboard Principal</h2>
 
       {/* Renderizado condicional basado en el rol */}
-      {role === "CLINICA" && <ClinicaDashboard />}
-      {role === "TI" || ("ADMIN" && <TIDashboard />)}
+      {(role === "CLINICA" || role == "ADMIN") && <ClinicaDashboard />}
+      {(role === "TI" || role === "ADMIN") && <TIDashboard />}
+      {(role === "COMERCIAL" || role === "ADMIN") && <ComercialDashboard />}
+      {(role === "ADMINISTRACION" || role === "ADMIN") && (
+        <AdministracionDashboard />
+      )}
 
       {/* Agrega más condiciones para otros roles */}
-      {role !== "CLINICA" && role !== "TI" && (
-        <p>No tienes un dashboard asignado.</p>
-      )}
     </div>
   );
 }
