@@ -7,17 +7,17 @@ import ComercialDashboard from "../components/ComercialDashboard";
 
 function Home() {
   const { role, username } = useAuth();
-
+  const hasRole = (roleName) => Array.isArray(role) && role.includes(roleName);
   return (
     <div>
       <h1>Bienvenido, {username}!</h1>
       <h2>Dashboard Principal</h2>
 
       {/* Renderizado condicional basado en el rol */}
-      {(role === "CLINICA" || role == "ADMIN") && <ClinicaDashboard />}
-      {(role === "TI" || role === "ADMIN") && <TIDashboard />}
-      {(role === "COMERCIAL" || role === "ADMIN") && <ComercialDashboard />}
-      {(role === "ADMINISTRACION" || role === "ADMIN") && (
+      {(hasRole("CLINICA") || hasRole("ADMIN")) && <ClinicaDashboard />}
+      {(hasRole("TI") || hasRole("ADMIN")) && <TIDashboard />}
+      {(hasRole("COMERCIAL") || hasRole("ADMIN")) && <ComercialDashboard />}
+      {(hasRole("ADMINISTRACION") || hasRole("ADMIN")) && (
         <AdministracionDashboard />
       )}
 

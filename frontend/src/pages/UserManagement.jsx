@@ -63,32 +63,29 @@ function UserManagement() {
 
   // Se activa al hacer clic en "Guardar"
   const handleSaveClick = (userId) => {
+    // Objeto con todos los datos a actualizar
     const dataToSave = {
       username: editedUsername,
       profile: {
         roles: selectedRoles,
       },
     };
-    api
-      .patch(`/api/users/${userId}/`, { profile: { roles: selectedRoles } })
-      .then((res) => {
-        alert("¡Roles actualizados exitosamente!");
-        setEditingUserId(null); // Salimos del modo edición
-        getUsers(); // Volvemos a cargar la lista de usuarios para ver el cambio
-      })
-      .catch((err) => {
-        alert(`Error: ${JSON.stringify(err.response.data)}`);
-      });
+
+    // Hacemos una única llamada PATCH con todos los datos
     api
       .patch(`/api/users/${userId}/`, dataToSave)
       .then(() => {
-        alert("¡Usuario actualizado!");
-        setEditingUserId(null);
-        getUsers();
+        alert("¡Usuario actualizado exitosamente!");
+        setEditingUserId(null); // Salimos del modo edición
+        getUsers(); // Recargamos la lista de usuarios para ver los cambios
       })
-      .catch((err) => alert(`Error: ${JSON.stringify(err.response.data)}`));
+      .catch((err) => {
+        // Mostramos el mensaje de error que viene de la API
+        const errorMessage =
+          err.response?.data?.detail || JSON.stringify(err.response?.data);
+        alert(`Error al actualizar: ${errorMessage}`);
+      });
   };
-
   const handleDeleteClick = (userId) => {
     // Pedimos confirmación antes de borrar
     if (
