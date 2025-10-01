@@ -1,0 +1,55 @@
+# =================================================================
+# General (Sistema Operativo, IDEs, etc.)
+# =================================================================
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.user
+
+# =================================================================
+# Backend (Python / Django)
+# =================================================================
+# Entorno virtual y variables de entorno (¡Aquí van tus credenciales de Postgres!)
+venv/
+.venv/
+env/
+.env
+
+# Archivos de bytecode de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de logs y media de desarrollo
+*.log
+/media/
+
+# Archivos de respaldo/dump de base de datos
+*.sql
+*.dump
+
+
+# =================================================================
+# Frontend (Node.js / React / Vite)
+# =================================================================
+# Dependencias
+/frontend/node_modules/
+
+# Archivos de build y caché de Vite
+/frontend/dist/
+/frontend/.vite/
+
+# Archivos de log
+/frontend/npm-debug.log*
+/frontend/yarn-error.log
+/frontend/yarn.lock
+
+# Variables de entorno locales
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+
+# Reportes de tests
+/frontend/coverage/
