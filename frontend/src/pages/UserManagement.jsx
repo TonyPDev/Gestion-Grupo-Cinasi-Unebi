@@ -16,17 +16,26 @@ import {
   IconButton,
   Typography,
   Box,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Chip,
+  TextField,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
   // State para saber qué usuario estamos editando
   const [editingUserId, setEditingUserId] = useState(null);
   // State para guardar el nuevo rol seleccionado
-  const [selectedRole, setSelectedRole] = useState("");
+  const [editedUsername, setEditedUsername] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState([]);
   const { userId: loggedInUserId } = useAuth();
 
   useEffect(() => {
@@ -43,7 +52,8 @@ function UserManagement() {
   // Se activa al hacer clic en "Editar"
   const handleEditClick = (user) => {
     setEditingUserId(user.id);
-    setSelectedRole(user.profile ? user.profile.role : "CLINICA");
+    setEditedUsername(user.username);
+    setSelectedRoles(user.profile ? user.profile.roles : []);
   };
 
   // Se activa al hacer clic en "Cancelar"
@@ -53,17 +63,49 @@ function UserManagement() {
 
   // Se activa al hacer clic en "Guardar"
   const handleSaveClick = (userId) => {
+    const dataToSave = {
+      username: editedUsername,
+      profile: {
+        roles: selectedRoles,
+      },
+    };
     api
-      .patch(`/api/users/${userId}/`, { profile: { role: selectedRole } })
+      .patch(`/api/users/${userId}/`, { profile: { roles: selectedRoles } })
       .then((res) => {
-        alert("¡Rol actualizado exitosamente!");
+        alert("¡Roles actualizados exitosamente!");
         setEditingUserId(null); // Salimos del modo edición
         getUsers(); // Volvemos a cargar la lista de usuarios para ver el cambio
       })
       .catch((err) => {
-        console.error("Error al actualizar el rol:", err.response.data);
         alert(`Error: ${JSON.stringify(err.response.data)}`);
       });
+    api
+      .patch(`/api/users/${userId}/`, dataToSave)
+      .then(() => {
+        alert("¡Usuario actualizado!");
+        setEditingUserId(null);
+        getUsers();
+      })
+      .catch((err) => alert(`Error: ${JSON.stringify(err.response.data)}`));
+  };
+
+  const handleDeleteClick = (userId) => {
+    // Pedimos confirmación antes de borrar
+    if (
+      window.confirm(
+        "¿Estás seguro de que quieres eliminar este usuario? Esta acción es irreversible."
+      )
+    ) {
+      api
+        .delete(`/api/users/delete/${userId}/`)
+        .then(() => {
+          alert("¡Usuario eliminado exitosamente!");
+          getUsers(); // Refrescamos la lista de usuarios
+        })
+        .catch((err) =>
+          alert(`Error al eliminar: ${JSON.stringify(err.response.data)}`)
+        );
+    }
   };
 
   return (
@@ -85,24 +127,48 @@ function UserManagement() {
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.id}</TableCell>
-                <TableCell>{user.username}</TableCell>
                 <TableCell>
                   {editingUserId === user.id ? (
-                    <Select
+                    <TextField
                       size="small"
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                    >
-                      <MenuItem value="CLINICA">Clínica</MenuItem>
-                      <MenuItem value="ADMINISTRACION">Administración</MenuItem>
-                      <MenuItem value="COMERCIAL">Comercial</MenuItem>
-                      <MenuItem value="TI">TI</MenuItem>
-                      <MenuItem value="ADMIN">Admin</MenuItem>
-                    </Select>
-                  ) : user.profile ? (
-                    user.profile.role
+                      value={editedUsername}
+                      onChange={(e) => setEditedUsername(e.target.value)}
+                    />
                   ) : (
-                    "Sin rol asignado"
+                    user.username
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingUserId === user.id ? (
+                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                      <InputLabel>Roles</InputLabel>
+                      <Select
+                        multiple
+                        value={selectedRoles}
+                        onChange={(e) => setSelectedRoles(e.target.value)}
+                        input={<OutlinedInput label="Roles" />}
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                          >
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} size="small" />
+                            ))}
+                          </Box>
+                        )}
+                      >
+                        {roleOptions.map((roleName) => (
+                          <MenuItem key={roleName} value={roleName}>
+                            {roleName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : // Muestra los roles como texto simple o un mensaje si no tiene
+                  user.profile ? (
+                    user.profile.roles.join(", ")
+                  ) : (
+                    "Sin roles"
                   )}
                 </TableCell>
                 <TableCell align="right">
@@ -114,18 +180,27 @@ function UserManagement() {
                       >
                         <SaveIcon />
                       </IconButton>
-                      <IconButton color="error" onClick={handleCancelClick}>
+                      <IconButton color="default" onClick={handleCancelClick}>
                         <CancelIcon />
                       </IconButton>
                     </>
                   ) : (
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEditClick(user)}
-                      disabled={user.id === loggedInUserId}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    <>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEditClick(user)}
+                        disabled={user.id === loggedInUserId}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDeleteClick(user.id)}
+                        disabled={user.id === loggedInUserId}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </>
                   )}
                 </TableCell>
               </TableRow>

@@ -13,56 +13,64 @@ import {
   InputLabel,
   CircularProgress,
   Paper,
+  OutlinedInput,
+  Chip,
 } from "@mui/material";
+
+// Helper para mostrar los roles seleccionados como "Chips"
+const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
 
 function Form({ route, method }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState("CLINICA");
+  const [roles, setRoles] = useState([]); // El estado es un array
   const navigate = useNavigate();
 
-  const name = method === "login" ? "Iniciar Sesión" : "Registrarse";
+  const name = method === "login" ? "Iniciar Sesión" : "Crear Usuario";
 
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
-    try {
-      const dataToSend = {
-        username,
-        password,
-      };
-      if (method === "register") {
-        if (!role) {
-          alert("Por favor, selecciona un rol.");
-          setLoading(false);
-          return;
-        }
-        dataToSend.role = role;
+
+    const dataToSend = {
+      username,
+      password,
+    };
+
+    if (method === "register") {
+      if (roles.length === 0) {
+        alert("Por favor, selecciona al menos un rol.");
+        setLoading(false);
+        return;
       }
+      dataToSend.roles = roles;
+    }
+
+    try {
       const res = await api.post(route, dataToSend);
+
       if (method === "login") {
         localStorage.setItem(ACCES_TOKEN, res.data.access);
         localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
         navigate("/");
       } else {
-        alert("Usuario Creado Exitosamente");
+        alert("¡Usuario creado exitosamente!");
         navigate("/admin/gestion-usuarios");
       }
     } catch (error) {
-      alert("Usuario no encontrado");
+      alert(`Error: ${JSON.stringify(error.response?.data || error.message)}`);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <Paper elevation={3} sx={{ maxWidth: 400, mx: "auto", mt: 8, p: 4 }}>
       <Box
         component="form"
         onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        noValidate
-        autoComplete="off"
       >
         <Typography variant="h4" component="h1" gutterBottom align="center">
           {name}
@@ -84,21 +92,28 @@ function Form({ route, method }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {/*Renderizado condicional del selector de rol */}
         {method === "register" && (
           <FormControl fullWidth>
-            <InputLabel id="role-select-label">Rol</InputLabel>
+            <InputLabel id="multiple-roles-label">Roles</InputLabel>
             <Select
-              labelId="role-select-label"
-              value={role}
-              label="Rol"
-              onChange={(e) => setRole(e.target.value)}
+              labelId="multiple-roles-label"
+              multiple
+              value={roles}
+              onChange={(e) => setRoles(e.target.value)}
+              input={<OutlinedInput label="Roles" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
             >
-              <MenuItem value="CLINICA">Clínica</MenuItem>
-              <MenuItem value="ADMINISTRACION">Administración</MenuItem>
-              <MenuItem value="COMERCIAL">Comercial</MenuItem>
-              <MenuItem value="TI">TI</MenuItem>
-              <MenuItem value="ADMIN">Admin</MenuItem>
+              {roleOptions.map((roleName) => (
+                <MenuItem key={roleName} value={roleName}>
+                  {roleName}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         )}
