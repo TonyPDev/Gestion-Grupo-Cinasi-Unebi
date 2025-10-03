@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 import {
   Users,
   TrendingUp,
@@ -15,7 +16,6 @@ import StatsCard from "../components/dashboard/StatsCard";
 import ModuleCard from "../components/dashboard/ModuleCard";
 import QuickActions from "../components/dashboard/QuickActions";
 import logo from "../assets/grupo-cinasi-logo.webp";
-
 const roleModules = {
   CLINICA: {
     title: "Clínica",
@@ -50,7 +50,7 @@ const roleModules = {
     description: "Configuración y usuarios",
     icon: Settings,
     color: "from-red-500 to-red-600",
-    route: "/admin/gestion-usuarios",
+    route: "/admin/dashboard",
   },
 };
 
@@ -90,12 +90,33 @@ const stats = [
 ];
 
 function Home() {
-  const { role, username } = useAuth();
+  const { username } = useAuth();
+  const [userRoles, setUserRoles] = useState([]);
   const navigate = useNavigate();
 
-  const availableModules = Object.entries(roleModules)
-    .filter(([roleName]) => role?.includes(roleName))
-    .map(([_, module]) => module);
+  // useEffect se ejecutará cada vez que el componente se monte (ej. al recargar la página).
+  useEffect(() => {
+    api
+      .get("/api/users/me/")
+      .then((res) => {
+        // Guardamos los roles frescos del servidor en nuestro estado local.
+        const roles = res.data.profile?.roles || [];
+        setUserRoles(roles);
+      })
+      .catch((err) => {
+        console.error("Error al obtener datos del usuario:", err);
+        // Si hay un error (ej. token inválido), podríamos redirigir al login.
+        // navigate("/logout");
+      });
+  }, []);
+
+  const isAdmin = userRoles.includes("ADMIN");
+
+  const availableModules = isAdmin
+    ? Object.values(roleModules)
+    : Object.entries(roleModules)
+        .filter(([roleName]) => userRoles.includes(roleName))
+        .map(([_, module]) => module);
 
   const handleModuleClick = (route) => {
     navigate(route);
@@ -106,55 +127,26 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img
-                src={logo}
-                alt="Grupo Cinasi Logo"
-                className="w-40 object-contain mx-auto pt-0"
-              />
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-600">Hola, {username}</span>
-              <button
-                onClick={() => navigate("/logout")}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-            Bienvenido de vuelta!
-          </h2>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">Tus Módulos</h3>
-          <p className="text-gray-600">Accede a las áreas según tus permisos</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {availableModules.map((module, index) => (
-            <ModuleCard
-              key={index}
-              module={module}
-              onClick={handleModuleClick}
-            />
-          ))}
-        </div>
-
-        <QuickActions onActionClick={handleActionClick} />
-      </main>
-    </div>
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+          Panel Principal
+        </h2>
+      </div>
+      <div className="mb-6">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Tus Módulos
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400">
+          Accede a las áreas según tus permisos
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {availableModules.map((module, index) => (
+          <ModuleCard key={index} module={module} onClick={handleModuleClick} />
+        ))}
+      </div>
+    </main>
   );
 }
 
