@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import api from "../../api";
 import { useNavigate } from "react-router-dom";
 import { ACCES_TOKEN, REFRESH_TOKEN } from "../../constants";
-
+import logo from "../../assets/grupo-cinasi-logo.webp";
 const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
 
 function Form({ route, method }) {
@@ -67,13 +67,15 @@ function Form({ route, method }) {
         </div>
 
         <div className="relative w-full max-w-md">
-          <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/50 p-8">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4">
-                <span className="text-white text-2xl font-bold">P</span>
-              </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Pills of Zen
+          <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/50 pt-0 px-8 pb-5">
+            <div className="text-center mb-6">
+              <img
+                src={logo}
+                alt="Grupo Cinasi Logo"
+                className="w-40 object-contain mx-auto pt-3"
+              />
+              <h1 className="text-2xl font-bold text-white mb-2 mt-4">
+                Bienvenido
               </h1>
               <p className="text-gray-400">Inicia sesión para continuar</p>
             </div>
@@ -84,12 +86,12 @@ function Form({ route, method }) {
                   Usuario <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="tu_usuario"
+                    placeholder="Ingrese usuario"
                     required
                     className="w-full pl-11 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
@@ -142,7 +144,7 @@ function Form({ route, method }) {
           </div>
 
           <div className="text-center mt-6 text-sm text-gray-500">
-            © 2025 Pills of Zen. Todos los derechos reservados.
+            © 2025 Grupo Cinasi.
           </div>
         </div>
       </div>

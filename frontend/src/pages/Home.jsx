@@ -14,6 +14,7 @@ import {
 import StatsCard from "../components/dashboard/StatsCard";
 import ModuleCard from "../components/dashboard/ModuleCard";
 import QuickActions from "../components/dashboard/QuickActions";
+import logo from "../assets/grupo-cinasi-logo.webp";
 
 const roleModules = {
   CLINICA: {
@@ -110,10 +111,11 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Pills of Zen</h1>
+              <img
+                src={logo}
+                alt="Grupo Cinasi Logo"
+                className="w-40 object-contain mx-auto pt-0"
+              />
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Hola, {username}</span>
@@ -130,18 +132,9 @@ function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">
             Bienvenido de vuelta!
           </h2>
-          <p className="text-gray-600">
-            Aquí está un resumen de tu actividad hoy
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <StatsCard key={index} {...stat} />
-          ))}
         </div>
 
         <div className="mb-6">
