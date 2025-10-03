@@ -5,6 +5,8 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserManagement from "./pages/admin/UserManagement";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import MainLayout from "./components/layout/MainLayout";
 
 function Logout() {
   localStorage.clear();
@@ -24,7 +26,19 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Home />
+              <MainLayout>
+                <Home />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <MainLayout>
+                <AdminDashboard />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -32,7 +46,9 @@ function App() {
           path="/admin/gestion-usuarios"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <UserManagement />
+              <MainLayout>
+                <UserManagement />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
