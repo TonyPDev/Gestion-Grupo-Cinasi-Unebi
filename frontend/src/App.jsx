@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MainLayout from "./components/layout/MainLayout";
+import NotFound from "./pages/NotFound";
 
 function Logout() {
   localStorage.clear();
@@ -62,6 +63,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
