@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import api from "../api";
-import "../styles/UserManagement.css"; // Crearemos este archivo para los estilos
-import { useAuth } from "../hooks/useAuth";
+import api from "../../api";
+import "../../styles/UserManagement.css"; // Crearemos este archivo para los estilos
+import { useAuth } from "../../hooks/useAuth";
 import {
   Table,
   TableBody,
