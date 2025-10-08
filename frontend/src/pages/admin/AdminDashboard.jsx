@@ -24,7 +24,7 @@ function AdminDashboard() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
           Panel de Administrador
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -32,7 +32,7 @@ function AdminDashboard() {
             <Link
               key={index}
               to={action.path}
-              className="group block p-6 bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-lg dark:shadow-black/30 hover:-translate-y-1 transition-transform border border-gray-200 dark:border-gray-700/50"
+              className="group block p-6 bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-lg dark:shadow-black/30 hover:-translate-y-1 transition-transform border border-gray-200 dark:border-gray-700/50 hover:border-blue-500 hover:dark:border-blue-400"
             >
               <div className="flex items-center space-x-4 mb-4">
                 <div className={`p-3 rounded-lg ${action.color}`}>

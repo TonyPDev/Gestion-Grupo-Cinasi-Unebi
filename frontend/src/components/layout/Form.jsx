@@ -91,7 +91,6 @@ function Form({ route, method }) {
         {/* Botón de tema oscuro/claro con z-index */}
         <div className="absolute top-4 right-4 z-50">
           {" "}
-          {/* <-- AÑADE z-50 AQUÍ */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none"
@@ -194,7 +193,6 @@ function Form({ route, method }) {
     );
   }
 
-  // (El formulario de registro permanece igual, pero también tendrá el botón si se renderiza desde esta misma ruta)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="absolute top-4 right-4 z-50">
@@ -210,6 +208,13 @@ function Form({ route, method }) {
             <Sun size={20} className="text-yellow-400" />
           )}
         </button>
+      </div>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
       </div>
       <div className="relative w-full max-w-lg">
         {" "}
