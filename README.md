@@ -131,11 +131,11 @@ A continuación se listan las tecnologías clave que impulsan este proyecto:
 | Tecnología | Propósito |
 |-------------|------------|
 | **React** | 	Biblioteca principal para construir la interfaz de usuario |
-| **Vite	| Herramienta de desarrollo rápida para React |
-| **React Router DOM	| Manejo de rutas y navegación |
-| **Tailwind CSS | 	Framework CSS para diseño moderno y responsive |
-| **Axios | 	Cliente HTTP para interactuar con la API |
-| **Lucide React | 	Biblioteca de iconos SVG ligera y personalizable |
+| **Vite**	| Herramienta de desarrollo rápida para React |
+| **React Router DOM**	| Manejo de rutas y navegación |
+| **Tailwind CSS** | 	Framework CSS para diseño moderno y responsive |
+| **Axios** | 	Cliente HTTP para interactuar con la API |
+| **Lucide React** | 	Biblioteca de iconos SVG ligera y personalizable |
 
 
 ✨ *Desarrollado con dedicación para optimizar la gestión interna de Grupo Cinasi Unebi.*
