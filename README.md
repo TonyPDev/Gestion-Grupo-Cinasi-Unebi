@@ -1,109 +1,129 @@
-﻿# Gestion-Grupo-Cinasi-Unebi
+# 🚀 Gestión - Grupo Cinasi Unebi
 
-# Gestion-Grupo-Cinasi-Unebi
+**Sistema de Gestión - Grupo Cinasi Unebi**  
+Este proyecto es una **aplicación web full-stack** diseñada para la **gestión de usuarios y roles** dentro de **Grupo Cinasi**.
 
-Sistema de Gestión - Grupo Cinasi Unebi
-Este proyecto es una aplicación web full-stack diseñada para la gestión de usuarios y roles dentro de grupo cinasi.
+---
 
-Para ejecutar este proyecto en tu entorno local, sigue los siguientes pasos:
+## 🧩 Prerrequisitos
 
-Prerrequisitos
-Python 3.8+ (3.13.1 de preferencia)
+Asegúrate de tener instaladas las siguientes herramientas antes de comenzar:
 
-Node.js (v22.20 de preferencia) y npm
+- **Python** `3.8+` *(preferentemente 3.13.1)*  
+- **Node.js** `v22.20` y **npm**  
+- **PostgreSQL**
 
-PostgreSQL
+---
 
-Configuración del Backend
-Clona el repositorio:
+## ⚙️ Configuración del Backend
 
+### 1️⃣ Clona el repositorio
+
+```bash
 git clone <URL-DEL-REPOSITORIO>
 cd <NOMBRE-DEL-REPOSITORIO>/backend
-Crea y activa un entorno virtual:
+```
 
+### 2️⃣ Crea y activa un entorno virtual
+
+```bash
 python -m venv venv
-Linux:source venv/bin/activate  
-En Windows: venv\Scripts\activate
+```
 
-Instala las dependencias:
+- En **Linux / macOS**:
+  ```bash
+  source venv/bin/activate
+  ```
+- En **Windows**:
+  ```bash
+  venv\Scripts\activate
+  ```
+
+### 3️⃣ Instala las dependencias
+
+```bash
 pip install -r requirements.txt
+```
 
-Configura las variables de entorno:
-Crea un archivo .env en la raíz de la carpeta backend/backend basándote en el archivo .env.example y añade las credenciales de tu base de datos y una SECRET_KEY.
+### 4️⃣ Configura las variables de entorno
 
-Ejecuta las migraciones:
+Crea un archivo `.env` en la raíz de la carpeta `backend/backend` basándote en el archivo `.env.example`, y añade las credenciales de tu base de datos y una `SECRET_KEY`.
+
+### 5️⃣ Ejecuta las migraciones
+
+```bash
 python manage.py migrate
+```
 
-Inicia el servidor de desarrollo:
+### 6️⃣ Inicia el servidor de desarrollo
+
+```bash
 python manage.py runserver
-El backend estará disponible en http://127.0.0.1:8000.
+```
 
-Configuración del Frontend
-Navega a la carpeta del frontend:
+📍 El backend estará disponible en:  
+👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+## 💻 Configuración del Frontend
+
+### 1️⃣ Navega a la carpeta del frontend
+
+```bash
 cd ../frontend
+```
 
-Instala las dependencias:
+### 2️⃣ Instala las dependencias
+
+```bash
 npm install
-Configura la URL de la API:
-Crea un archivo .env en la raíz de la carpeta frontend y define la variable de entorno que apunta a tu backend:
+```
 
+### 3️⃣ Configura la URL de la API
+
+Crea un archivo `.env` en la raíz de la carpeta `frontend` y define la variable de entorno que apunta a tu backend:
+
+```
 VITE_API_URL=http://127.0.0.1:8000
+```
 
-Inicia el servidor de desarrollo:
+### 4️⃣ Inicia el servidor de desarrollo
 
+```bash
 npm run dev
-La aplicación se abrirá en http://localhost:5173 (o el puerto que indique Vite).
+```
 
-📁 Estructura de Carpetas
+📍 La aplicación se abrirá en:  
+👉 [http://localhost:5173](http://localhost:5173) *(o el puerto que indique Vite)*
+
+---
+
+## 📁 Estructura de Carpetas
+
 El proyecto está organizado en dos carpetas principales:
 
-./backend/: Contiene todo el código relacionado con el servidor Django, la API y la lógica de negocio.
+```
+./backend/   → Contiene todo el código relacionado con el servidor Django, la API y la lógica de negocio.
+./frontend/  → Contiene la aplicación de React, incluyendo componentes, páginas, estilos y la lógica de la interfaz de usuario.
+```
 
-./frontend/: Contiene la aplicación de React, incluyendo componentes, páginas, estilos y la lógica de la interfaz de usuario.
+---
 
-Tecnologías Utilizadas
+## 🧠 Tecnologías Utilizadas
+
 A continuación se listan las tecnologías clave que impulsan este proyecto:
 
-Backend (Django)
-Tecnología Propósito
-Django Framework principal para el desarrollo del backend.
-Django REST Framework Creación de APIs RESTful robustas y escalables.
-Simple JWT Implementación de la autenticación basada en tokens JWT.
-psycopg2-binary Adaptador de base de datos para PostgreSQL.
-django-cors-headers Manejo de Cross-Origin Resource Sharing (CORS) para permitir la comunicación con el frontend.
+### 🔹 Backend (Django)
 
-Claro, aquí tienes una propuesta para el archivo README de tu proyecto.
+| Tecnología | Propósito |
+|-------------|------------|
+| **Django** | Framework principal para el desarrollo del backend |
+| **Django REST Framework** | Creación de APIs RESTful robustas y escalables |
+| **Simple JWT** | Implementación de la autenticación basada en tokens JWT |
+| **psycopg2-binary** | Adaptador de base de datos para PostgreSQL |
+| **django-cors-headers** | Manejo de CORS para permitir la comunicación con el frontend |
 
-Sistema de Gestión - Grupo Cinasi Unebi
-Este proyecto es una aplicación web full-stack diseñada para la gestión de usuarios y roles dentro de una organización. Cuenta con un backend robusto desarrollado con Django y un frontend moderno y reactivo construido con React y Vite.
+---
 
-✨ Características Principales
-Autenticación Segura: Sistema de inicio y cierre de sesión basado en JSON Web Tokens (JWT).
-
-Gestión de Roles: Soporte para múltiples roles por usuario, permitiendo un control de acceso granular a las diferentes secciones de la aplicación.
-
-Panel de Administración: Los usuarios con rol de ADMIN pueden crear, visualizar, editar y eliminar otros usuarios, así como asignarles roles específicos.
-
-Dashboards por Rol: Interfaces personalizadas para cada rol de usuario (ADMIN, CLINICA, COMERCIAL, ADMINISTRACION, TI), mostrando los módulos y herramientas relevantes para cada uno.
-
-Interfaz Moderna y Adaptable: Desarrollada con Tailwind CSS para un diseño limpio, adaptable a distintos dispositivos y con soporte para tema oscuro y claro.
-
-Protección de Rutas: Acceso a las distintas páginas y componentes restringido según los roles del usuario autenticado.
-
-🛠️ Tecnologías Utilizadas
-A continuación se listan las tecnologías clave que impulsan este proyecto:
-
-Backend (Django)
-Django - Framework principal para el desarrollo del backend.
-Django - REST Framework Creación de APIs RESTful robustas y escalables.
-Simple - JWT Implementación de la autenticación basada en tokens JWT.
-psycopg2 - binary Adaptador de base de datos para PostgreSQL.
-django-cors-headers -- Manejo de Cross-Origin Resource Sharing (CORS) para permitir la comunicación con el frontend.
-
-Frontend (React)
-React - Biblioteca principal para construir la interfaz de usuario.
-Vite - Herramienta de desarrollo frontend de alta velocidad.
-React Router DOM - Para la gestión de rutas y navegación en la aplicación.
-Tailwind CSS - Framework de CSS para un diseño rápido y personalizable.
-Axios - Cliente HTTP para realizar peticiones a la API del backend.
-Lucide React - Biblioteca de iconos SVG ligera y personalizable.
+✨ *Desarrollado con dedicación para optimizar la gestión interna de Grupo Cinasi Unebi.*
