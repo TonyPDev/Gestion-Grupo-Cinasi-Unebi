@@ -7,7 +7,7 @@ export default function ModuleCard({ module, onClick }) {
   return (
     <div
       onClick={() => onClick(module.route)}
-      className="group relative bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg dark:shadow-black/20 overflow-hidden hover:shadow-2xl dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-2 cursor-pointer border border-transparent dark:border-gray-700/50"
+      className="group relative bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg dark:shadow-black/20 overflow-hidden hover:shadow-2xl dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-2 cursor-pointer border border-transparent dark:border-gray-700/50 hover:border-blue-500 hover:dark:border-blue-400"
     >
       <div
         className={`absolute inset-0 bg-gradient-to-br ${module.color} opacity-10 dark:opacity-20`}
