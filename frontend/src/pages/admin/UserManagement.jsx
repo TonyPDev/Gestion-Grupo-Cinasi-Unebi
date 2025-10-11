@@ -34,7 +34,7 @@ function UserManagement() {
 
   // Estados para paginación y búsqueda
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Valor inicial
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -95,6 +95,12 @@ function UserManagement() {
         : [...prevRoles, role]
     );
   };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset page to 0 when rows per page changes
+  };
+
   const filteredUsers = users.filter((user) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -252,7 +258,23 @@ function UserManagement() {
               </tbody>
             </table>
           </div>
+          {/* ***** SECCIÓN DE PAGINACIÓN ACTUALIZADA ***** */}
           <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Filas por página:
+              </span>
+              <select
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1 text-sm"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+              </select>
+            </div>
+
             <span className="text-sm text-gray-600 dark:text-gray-400">
               Mostrando {page * rowsPerPage + 1}-
               {Math.min((page + 1) * rowsPerPage, filteredUsers.length)} de{" "}

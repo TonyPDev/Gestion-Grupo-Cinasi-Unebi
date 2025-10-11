@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Profile, Role
+from .models import Profile, Role, UnebiKey, ActivityLog
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from datetime import datetime
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,16 +20,18 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-       # Sacamos el rol de los datos validados antes de crear el usuario
         roles_data = validated_data.pop('roles')
-        # Creamos el usuario solo con sus datos ('username', 'password')
         user = User.objects.create_user(**validated_data)
         profile = Profile.objects.create(user=user)
-        # Asignamos los roles
         roles = Role.objects.filter(name__in=roles_data)
         profile.roles.set(roles)
+        
+        ActivityLog.objects.create(
+            user=self.context['request'].user,
+            action="Create User",
+            details=f"User {user.username} created."
+        )
         return user
-    
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -37,14 +40,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['user_id'] = user.id
         try:
-            #Se envía una lista de roles
             token['roles'] = [role.name for role in user.profile.roles.all()]
         except user._meta.model.profile.RelatedObjectDoesNotExist:
-            # Manejar el caso de que un usuario no tenga perfil
             token['roles'] = []
         return token
-    
-# Serializer para el perfil (al listar/editar)
+
 class ProfileSerializer(serializers.ModelSerializer):
     roles = serializers.SlugRelatedField(
         many=True,
@@ -56,7 +56,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['roles']
 
-# Serializer para listar y actualizar usuarios
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
 
@@ -65,23 +64,56 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'profile']
 
     def update(self, instance, validated_data):
-        # El usuario que hace la petición (el admin logueado)
         request_user = self.context['request'].user
-        
-        # Obtenemos los datos del perfil del JSON ya validado
         profile_data = validated_data.pop('profile', None)
         
-        # Si se enviaron datos del perfil, procedemos a actualizar los roles
         if profile_data:
             new_roles = profile_data.get('roles')
-
-            # Si el usuario que se edita es el mismo que está logueado y se está quitando el rol de ADMIN
             if instance == request_user and not any(role.name == 'ADMIN' for role in new_roles):
                 raise serializers.ValidationError({"detail": "No puedes quitarte tu propio rol de ADMIN."})
-
-            # Obtenemos o creamos el perfil y le asignamos los nuevos roles
             profile, created = Profile.objects.get_or_create(user=instance)
             profile.roles.set(new_roles)
 
-        # Finalmente, actualizamos el resto de los campos del usuario, como el username
+        ActivityLog.objects.create(
+            user=request_user,
+            action="Update User",
+            details=f"User {instance.username} updated."
+        )
         return super().update(instance, validated_data)
+
+class UnebiKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnebiKey
+        fields = '__all__'
+        read_only_fields = ['historial']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        
+        validated_data['historial'] = f"Creada el {timestamp} por: {user.username}"
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        
+        changes = []
+        for attr, value in validated_data.items():
+            old_value = getattr(instance, attr)
+            if str(old_value) != str(value):
+                changes.append(f"- Campo '{attr}': de '{old_value}' a '{value}'")
+
+        if changes:
+            change_log = f"\n--- Actualizado el {timestamp} por: {user.username} ---\n" + "\n".join(changes)
+            validated_data['historial'] = instance.historial + change_log
+        
+        return super().update(instance, validated_data)
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = ActivityLog
+        fields = ['id', 'user', 'action', 'details', 'timestamp']

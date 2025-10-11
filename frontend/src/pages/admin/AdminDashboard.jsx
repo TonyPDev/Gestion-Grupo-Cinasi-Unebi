@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Users } from "lucide-react";
+import { UserPlus, Users, ListChecks } from "lucide-react"; // Importa el nuevo ícono
 
 function AdminDashboard() {
   const actions = [
@@ -18,6 +18,15 @@ function AdminDashboard() {
         "Editar, eliminar y cambiar roles de los usuarios existentes.",
       path: "/admin/gestion-usuarios",
       color: "bg-green-600",
+    },
+    // --- NUEVA TARJETA AÑADIDA ---
+    {
+      label: "Registro de Actividad",
+      icon: ListChecks,
+      description:
+        "Ver todos los registros de creación, edición y eliminación.",
+      path: "/admin/activity-log",
+      color: "bg-yellow-600",
     },
   ];
 
