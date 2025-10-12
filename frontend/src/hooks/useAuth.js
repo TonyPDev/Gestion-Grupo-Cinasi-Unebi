@@ -5,7 +5,7 @@ export const useAuth = () => {
   const token = localStorage.getItem(ACCES_TOKEN);
 
   if (!token) {
-    return { isAuth: false, role: null, username: null };
+    return { isAuth: false, role: null, username: null, fullName: null };
   }
 
   try {
@@ -15,9 +15,16 @@ export const useAuth = () => {
       role: decoded.roles,
       username: decoded.username,
       userId: decoded.user_id,
+      fullName: decoded.full_name,
     };
   } catch (e) {
     console.error("Token inválido:", e);
-    return { isAuth: false, roles: [], username: null, userId: null };
+    return {
+      isAuth: false,
+      roles: [],
+      username: null,
+      userId: null,
+      fullName: null,
+    };
   }
 };

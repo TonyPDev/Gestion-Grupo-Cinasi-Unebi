@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Mapeo de roles a colores de Tailwind para las etiquetas
 const roleColorMap = {
   ADMIN: "bg-red-500/20 text-red-400 border border-red-500/30",
   TI: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
@@ -28,11 +27,11 @@ function UserManagement() {
   const [users, setUsers] = useState([]);
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUsername, setEditedUsername] = useState("");
+  const [editedFullName, setEditedFullName] = useState("");
   const [selectedRoles, setSelectedRoles] = useState([]);
   const { userId: loggedInUserId } = useAuth();
   const navigate = useNavigate();
 
-  // Estados para paginación y búsqueda
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Valor inicial
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +51,7 @@ function UserManagement() {
     setEditingUserId(user.id);
     setEditedUsername(user.username);
     setSelectedRoles(user.profile ? user.profile.roles : []);
+    setEditedFullName(user.profile ? user.profile.full_name : "");
   };
 
   const handleCancelClick = () => setEditingUserId(null);
@@ -60,7 +60,10 @@ function UserManagement() {
     api
       .patch(`/api/users/${userId}/`, {
         username: editedUsername,
-        profile: { roles: selectedRoles },
+        profile: {
+          roles: selectedRoles,
+          full_name: editedFullName,
+        },
       })
       .then(() => {
         alert("¡Usuario actualizado exitosamente!");
@@ -98,11 +101,14 @@ function UserManagement() {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset page to 0 when rows per page changes
+    setPage(0);
   };
 
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.profile?.full_name &&
+        user.profile.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const paginatedUsers = filteredUsers.slice(
@@ -149,7 +155,7 @@ function UserManagement() {
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   <th className="p-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Nombre
+                    Usuario
                   </th>
                   <th className="p-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                     Roles
@@ -167,19 +173,30 @@ function UserManagement() {
                   >
                     <td className="p-4 whitespace-nowrap">
                       {editingUserId === user.id ? (
-                        <input
-                          type="text"
-                          value={editedUsername}
-                          onChange={(e) => setEditedUsername(e.target.value)}
-                          className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 w-full"
-                        />
+                        <div className="space-y-2">
+                          {/* --- SE ELIMINA 'w-full' PARA CORREGIR EL DISEÑO --- */}
+                          <input
+                            type="text"
+                            value={editedFullName}
+                            placeholder="Nombre Completo"
+                            onChange={(e) => setEditedFullName(e.target.value)}
+                            className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
+                          />
+                          <input
+                            type="text"
+                            value={editedUsername}
+                            placeholder="Nombre de Usuario"
+                            onChange={(e) => setEditedUsername(e.target.value)}
+                            className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
+                          />
+                        </div>
                       ) : (
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {user.username}
+                            {user.profile?.full_name || "Nombre no asignado"}
                           </p>
                           <p className="text-gray-500 dark:text-gray-400">
-                            ID: {user.id}
+                            @{user.username}
                           </p>
                         </div>
                       )}

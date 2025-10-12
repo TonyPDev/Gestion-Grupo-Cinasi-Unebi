@@ -2,13 +2,13 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import logo from "../../assets/grupo-cinasi-logo.webp";
-import { useTheme } from "../../context/ThemeContext"; // Importa el hook useTheme
+import { useTheme } from "../../context/ThemeContext";
 import { Sun, Moon } from "lucide-react";
 
 function Navbar() {
-  const { username } = useAuth();
+  const { fullName, username } = useAuth();
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme(); // Usa el hook para obtener el tema y la función para cambiarlo
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -26,7 +26,7 @@ function Navbar() {
           </Link>
           <div className="flex items-center space-x-4">
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-              Hola, {username}
+              Hola, {fullName || username}
             </span>
             {/* Botón para cambiar el tema */}
             <button
