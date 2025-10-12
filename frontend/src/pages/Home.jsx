@@ -16,34 +16,35 @@ import StatsCard from "../components/dashboard/StatsCard";
 import ModuleCard from "../components/dashboard/ModuleCard";
 import QuickActions from "../components/dashboard/QuickActions";
 import logo from "../assets/grupo-cinasi-logo.webp";
+
 const roleModules = {
   CLINICA: {
     title: "Clínica",
     description: "Gestión de pacientes y citas médicas",
     icon: Activity,
     color: "from-blue-500 to-blue-600",
-    route: "/clinica",
+    route: "/clinica/dashboard",
   },
   COMERCIAL: {
     title: "Comercial",
     description: "Ventas, clientes y reportes",
     icon: ShoppingCart,
     color: "from-purple-500 to-purple-600",
-    route: "/comercial",
+    route: "/comercial/dashboard",
   },
   ADMINISTRACION: {
     title: "Administración",
     description: "Finanzas y recursos humanos",
     icon: FileText,
     color: "from-orange-500 to-orange-600",
-    route: "/administracion",
+    route: "/administracion/dashboard",
   },
   TI: {
     title: "Tecnología",
     description: "Sistemas e infraestructura",
     icon: Database,
     color: "from-teal-500 to-teal-600",
-    route: "/ti",
+    route: "/ti/dashboard",
   },
   ADMIN: {
     title: "Administrador",
