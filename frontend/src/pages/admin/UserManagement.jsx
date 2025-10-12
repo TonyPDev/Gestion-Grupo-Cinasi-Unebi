@@ -33,7 +33,7 @@ function UserManagement() {
   const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Valor inicial
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -275,6 +275,7 @@ function UserManagement() {
               </tbody>
             </table>
           </div>
+          {/* ***** SECCIÓN DE PAGINACIÓN ACTUALIZADA ***** */}
           <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">
