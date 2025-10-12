@@ -89,8 +89,14 @@ function ActivityLogViewer() {
                       key={log.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <td className="p-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                        {log.user}
+                      <td className="p-4 whitespace-nowrap">
+                        {/* --- SE MUESTRA EL NOMBRE COMPLETO Y USUARIO --- */}
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {log.user_full_name || "N/A"}
+                        </p>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          @{log.user_username}
+                        </p>
                       </td>
                       <td className="p-4 whitespace-nowrap">{log.action}</td>
                       <td className="p-4">{log.details}</td>

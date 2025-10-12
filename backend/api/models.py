@@ -11,7 +11,8 @@ class Role(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     roles = models.ManyToManyField(Role)
-
+    full_name = models.CharField(max_length=255, blank=True, default='')
+    
     def __str__(self):
         return f"{self.user.username} - Roles: {', '.join([role.name for role in self.roles.all()])}"
 

@@ -20,6 +20,7 @@ const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
 function Form({ route, method }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -53,7 +54,7 @@ function Form({ route, method }) {
       }
     }
 
-    const dataToSend = { username, password, roles };
+    const dataToSend = { username, password, roles, full_name: fullName };
 
     try {
       const res = await api.post(route, dataToSend);
@@ -197,7 +198,6 @@ function Form({ route, method }) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="absolute top-4 right-4 z-50">
         {" "}
-        {/* <-- AÑADE z-50 AQUÍ TAMBIÉN */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none"
@@ -232,6 +232,22 @@ function Form({ route, method }) {
           </div>
 
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nombre Completo <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nombre Apellido"
+                  required
+                  className="w-full pl-11 pr-4 py-3 bg-gray-100 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+              </div>
+            </div>
             {/* Campo de Usuario */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
