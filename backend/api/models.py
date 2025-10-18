@@ -25,6 +25,7 @@ class UnebiKey(models.Model):
     condicion = models.CharField(max_length=255, blank=True, null=True)
     orden_servicio = models.CharField(max_length=255, blank=True, null=True)
     fecha_solicitud = models.DateField(blank=True, null=True)
+    fecha_cofepris = models.DateField(blank=True, null=True)
     clave_asignada = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True)
     tipo_proyecto = models.CharField(max_length=255, blank=True, null=True)
@@ -39,7 +40,6 @@ class UnebiKey(models.Model):
     segmento_contable = models.CharField(max_length=255, blank=True, null=True)
     diseno = models.CharField(max_length=255, blank=True, null=True)
     tamano_muestras = models.CharField(max_length=255, blank=True, null=True)
-    datos_adjuntos = models.FileField(upload_to='attachments/', blank=True, null=True)
 
 class ActivityLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

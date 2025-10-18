@@ -17,14 +17,15 @@ const UnebiKeyModal = ({
   useEffect(() => {
     const initialData = {
       elaborador: "",
-      tipo_estudio: "Estudio",
+      tipo_estudio: "",
       patrocinador: "",
       principio_activo: "",
-      condicion: "Ayuno",
+      condicion: "",
       orden_servicio: "",
       fecha_solicitud: null,
+      fecha_cofepris: null,
       clave_asignada: "",
-      status: "Escritura",
+      status: "",
       tipo_proyecto: "Nuevo Proyecto",
       comentarios: "",
       llave_pago_cofepris: "",
@@ -37,7 +38,6 @@ const UnebiKeyModal = ({
       segmento_contable: "",
       diseno: "2x2",
       tamano_muestras: "",
-      datos_adjuntos: null,
     };
 
     if (unebiKey) {
@@ -93,11 +93,6 @@ const UnebiKeyModal = ({
 
     for (const key in finalData) {
       if (key === "historial") continue;
-      if (key === "datos_adjuntos" && finalData[key] instanceof File) {
-        dataToSend.append(key, finalData[key]);
-      } else if (finalData[key] !== null && finalData[key] !== undefined) {
-        dataToSend.append(key, finalData[key]);
-      }
     }
 
     const apiCall = unebiKey
@@ -133,6 +128,7 @@ const UnebiKeyModal = ({
     const clinicaFields = [
       "condicion",
       "clave_asignada",
+      "fecha_cofepris",
       "status",
       "llave_pago_cofepris",
       "no_cofepris",
@@ -290,6 +286,19 @@ const UnebiKeyModal = ({
                 value={formData.fecha_solicitud || ""}
                 onChange={handleChange}
                 disabled={isFieldDisabled("fecha_solicitud")}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">
+                Fecha Cofepris
+              </label>
+              <input
+                type="date"
+                name="fecha_cofepris"
+                value={formData.fecha_cofepris || ""}
+                onChange={handleChange}
+                disabled={isFieldDisabled("fecha_cofepris")}
                 className={inputClass}
               />
             </div>
@@ -461,20 +470,6 @@ const UnebiKeyModal = ({
                 className={inputClass}
               />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium">
-                Datos adjuntos
-              </label>
-              <input
-                type="file"
-                name="datos_adjuntos"
-                onChange={handleChange}
-                disabled={isFieldDisabled("datos_adjuntos")}
-                className={`${inputClass} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100`}
-              />
-            </div>
-
             <div className="md:col-span-2 lg:col-span-3">
               <label className="block text-sm font-medium">Observaciones</label>
               <textarea

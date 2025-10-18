@@ -21,6 +21,7 @@ const ALL_COLUMNS = [
   { id: "condicion", label: "Condición" },
   { id: "orden_servicio", label: "Orden de Servicio" },
   { id: "fecha_solicitud", label: "Fecha de Solicitud" },
+  { id: "fecha_cofepris", label: "Fecha Cofepris" },
   { id: "clave_asignada", label: "Clave Asignada" },
   { id: "status", label: "Status" },
   { id: "tipo_proyecto", label: "Tipo de Proyecto" },
