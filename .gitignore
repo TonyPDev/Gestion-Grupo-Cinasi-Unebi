@@ -37,6 +37,10 @@ __pycache__/
 # Frontend (Node.js / React / Vite)
 # =================================================================
 # Dependencias
+node_modules
+package-lock.json
+package.json
+
 /frontend/node_modules/
 
 # Archivos de build y caché de Vite
