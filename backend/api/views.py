@@ -6,6 +6,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from .permissions import *
 from .models import UnebiKey, ActivityLog
+from .models import Requisicion # Añade el modelo
+from .serializers import RequisicionSerializer # Añade el serializer
+from .permissions import IsAdministracionUser # O el permiso que definas
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -98,3 +101,18 @@ class ActivityLogListView(generics.ListAPIView):
         if action_type is not None:
             queryset = queryset.filter(action=action_type)
         return queryset
+
+class RequisicionViewSet(viewsets.ModelViewSet):
+    queryset = Requisicion.objects.all().order_by('-fecha_solicitud')
+    serializer_class = RequisicionSerializer
+    permission_classes = [IsAuthenticated, IsAdministracionUser | IsAdminUser] # Ejemplo
+
+    # Puedes sobreescribir perform_create, perform_update, perform_destroy
+    # para añadir lógica extra o logs como en UnebiKeyViewSet
+    def perform_destroy(self, instance):
+        ActivityLog.objects.create(
+            user=self.request.user,
+            action="Delete Requisicion",
+            details=f"Requisición Folio: {instance.folio} eliminada."
+        )
+        instance.delete()
