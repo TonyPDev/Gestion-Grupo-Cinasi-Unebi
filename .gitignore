@@ -1,55 +1,58 @@
-# =================================================================
-# General (Sistema Operativo, IDEs, etc.)
-# =================================================================
-.DS_Store
+# Python
+*.py[cod]
+*$py.class
+_pycache_/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+venv/
+env/
+ENV/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+/staticfiles/
+/static/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
 .vscode/
 .idea/
-*.suo
-*.user
+*.swp
+*.swo
+*~
+.DS_Store
 
-# =================================================================
-# Backend (Python / Django)
-# =================================================================
-# Entorno virtual y variables de entorno (¡Aquí van tus credenciales de Postgres!)
-venv/
-.venv/
-env/
-.env
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Archivos de bytecode de Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# React / Vite
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
 
-# Archivos de logs y media de desarrollo
-*.log
-/media/
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
 
-# Archivos de respaldo/dump de base de datos
-*.sql
-*.dump
-
-
-# =================================================================
-# Frontend (Node.js / React / Vite)
-# =================================================================
-# Dependencias
-/frontend/node_modules/
-
-# Archivos de build y caché de Vite
-/frontend/dist/
-/frontend/.vite/
-
-# Archivos de log
-/frontend/npm-debug.log*
-/frontend/yarn-error.log
-/frontend/yarn.lock
-
-# Variables de entorno locales
-/frontend/.env
-/frontend/.env.local
-/frontend/.env.*.local
-
-# Reportes de tests
-/frontend/coverage/
+# Other
+*.bak
+*.tmp
+.cache/
