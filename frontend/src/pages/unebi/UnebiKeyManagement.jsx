@@ -173,7 +173,7 @@ function UnebiKeyManagement() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="max-w-screen-xl mx-auto">
+      <div className="mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
