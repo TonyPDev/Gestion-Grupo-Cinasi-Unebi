@@ -13,6 +13,10 @@ import ClinicaDashboard from "./pages/modules/ClinicaDashboard";
 import ComercialDashboard from "./pages/modules/ComercialDashboard";
 import TIDashboard from "./pages/modules/TIDashboard";
 import UnebiKeyManagement from "./pages/unebi/UnebiKeyManagement";
+import AdministracionDashboard from "./pages/modules/AdministracionDashboard"; // Importa el dashboard
+import Requisiciones from "./pages/administracion/Requisiciones"; // <-- Verifica esta línea
+import NuevoModuloTI from "./pages/ti/NuevoModuloTI";
+
 
 function Logout() {
   localStorage.clear();
@@ -59,6 +63,28 @@ function App() {
           }
         />
         <Route
+            path="/administracion/dashboard"
+            element={
+                <ProtectedRoute allowedRoles={["ADMINISTRACION", "ADMIN"]}>
+                <MainLayout>
+                    <AdministracionDashboard />
+                </MainLayout>
+                </ProtectedRoute>
+            }
+            />
+
+         {/* Ruta para el Módulo de Requisiciones */}
+         <Route
+            path="/administracion/requisiciones"
+            element={
+                <ProtectedRoute allowedRoles={["ADMINISTRACION", "ADMIN"]}>
+                <MainLayout>
+                    <Requisiciones />
+                </MainLayout>
+                </ProtectedRoute>
+            }
+            />
+        <Route
           path="/clinica/dashboard"
           element={
             <ProtectedRoute allowedRoles={["CLINICA", "ADMIN"]}>
@@ -84,6 +110,28 @@ function App() {
             <ProtectedRoute allowedRoles={["TI", "ADMIN"]}>
               <MainLayout>
                 <TIDashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ti/dashboard" // Dashboard TI existente
+          element={
+            <ProtectedRoute allowedRoles={["TI", "ADMIN"]}>
+              <MainLayout>
+                <TIDashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Nueva Ruta para el Módulo TI */}
+        <Route
+          path="/ti/nuevo-modulo" // La ruta que definiste en el Link
+          element={
+            <ProtectedRoute allowedRoles={["TI", "ADMIN"]}> {/* Ajusta roles si es necesario */}
+              <MainLayout>
+                <NuevoModuloTI /> {/* Renderiza tu nuevo componente */}
               </MainLayout>
             </ProtectedRoute>
           }

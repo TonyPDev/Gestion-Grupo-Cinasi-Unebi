@@ -14,24 +14,21 @@
 # =================================================================
 # Entorno virtual y variables de entorno (¡Aquí van tus credenciales de Postgres!)
 venv/
-.venv/
 env/
-.env
+ENV/
 
-# Archivos de bytecode de Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Archivos de logs y media de desarrollo
+# Django
 *.log
-/media/
+db.sqlite3
+db.sqlite3-journal
+media/
+/staticfiles/
+/static/
 
-# Archivos de respaldo/dump de base de datos
-*.sql
-*.dump
-
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # =================================================================
 # Frontend (Node.js / React / Vite)

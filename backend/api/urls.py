@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'unebikeys', views.UnebiKeyViewSet, basename='unebikey')
+router.register(r'requisiciones', views.RequisicionViewSet, basename='requisicion')
 
 urlpatterns = [
     path("users/me/", views.CurrentUserView.as_view(), name="current-user"),
