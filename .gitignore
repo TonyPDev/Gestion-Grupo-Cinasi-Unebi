@@ -1,13 +1,18 @@
-# Python
-*.py[cod]
-*$py.class
-_pycache_/
-*.so
-*.egg
-*.egg-info/
-dist/
-build/
-.Python
+# =================================================================
+# General (Sistema Operativo, IDEs, etc.)
+# =================================================================
+.DS_Store
+.vscode/
+.vs/
+.vs
+.idea/
+*.suo
+*.user
+
+# =================================================================
+# Backend (Python / Django)
+# =================================================================
+# Entorno virtual y variables de entorno (¡Aquí van tus credenciales de Postgres!)
 venv/
 env/
 ENV/
@@ -25,34 +30,29 @@ media/
 .env.local
 .env.*.local
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
+# =================================================================
+# Frontend (Node.js / React / Vite)
+# =================================================================
+# Dependencias
+node_modules
+package-lock.json
+package.json
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+/frontend/node_modules/
 
-# React / Vite
-frontend/dist/
-frontend/.vite/
-frontend/.env
-frontend/.env.local
+# Archivos de build y caché de Vite
+/frontend/dist/
+/frontend/.vite/
 
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
+# Archivos de log
+/frontend/npm-debug.log*
+/frontend/yarn-error.log
+/frontend/yarn.lock
 
-# Other
-*.bak
-*.tmp
-.cache/
+# Variables de entorno locales
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+
+# Reportes de tests
+/frontend/coverage/
