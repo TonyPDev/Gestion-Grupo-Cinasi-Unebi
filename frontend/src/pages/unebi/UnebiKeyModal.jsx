@@ -156,15 +156,13 @@ const UnebiKeyModal = ({
   if (!isOpen) return null;
 
   const inputClass =
-    "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-400 dark:disabled:border-gray-700";
+    "mt-1 block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-md dark:bg-gray-700 dark:border-gray-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-400 dark:disabled:border-gray-700";
 
   return (
-    // ***** 1. onClick añadido al contenedor principal *****
     <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4"
       onClick={onClose}
     >
-      {/* ***** 2. onClick con stopPropagation añadido al contenido del modal ***** */}
       <div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full md:w-3/4 lg:w-2/3 max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -183,7 +181,7 @@ const UnebiKeyModal = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium">Elaborador</label>
+              <label className="block text-md font-medium">Elaborador</label>
               <input
                 type="text"
                 name="elaborador"
@@ -195,7 +193,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Tipo de Estudio
               </label>
               <select
@@ -223,7 +221,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Patrocinador</label>
+              <label className="block text-md font-medium">Patrocinador</label>
               <input
                 type="text"
                 name="patrocinador"
@@ -235,7 +233,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div className="md:col-span-2 lg:col-span-3">
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Principio activo/Dosis/Consideración de uso
               </label>
               <textarea
@@ -249,7 +247,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Condición</label>
+              <label className="block text-md font-medium">Condición</label>
               <select
                 name="condicion"
                 value={formData.condicion || ""}
@@ -263,7 +261,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Orden de servicio
               </label>
               <input
@@ -277,7 +275,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Fecha de Solicitud
               </label>
               <input
@@ -290,7 +288,7 @@ const UnebiKeyModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Fecha Cofepris
               </label>
               <input
@@ -304,7 +302,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Clave Asignada
               </label>
               <input
@@ -318,7 +316,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Status</label>
+              <label className="block text-md font-medium">Status</label>
               <select
                 name="status"
                 value={formData.status || ""}
@@ -336,7 +334,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Tipo de Proyecto
               </label>
               <select
@@ -352,7 +350,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div className="md:col-span-2 lg:col-span-3">
-              <label className="block text-sm font-medium">Comentarios</label>
+              <label className="block text-md font-medium">Comentarios</label>
               <textarea
                 name="comentarios"
                 value={formData.comentarios || ""}
@@ -364,7 +362,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Llave de pago de Cofepris
               </label>
               <input
@@ -378,7 +376,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">No. Cofepris</label>
+              <label className="block text-md font-medium">No. Cofepris</label>
               <input
                 type="text"
                 name="no_cofepris"
@@ -390,7 +388,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Fecha de Pago IP
               </label>
               <input
@@ -404,7 +402,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Fecha de pago Comité
               </label>
               <input
@@ -418,7 +416,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Fecha</label>
+              <label className="block text-md font-medium">Fecha</label>
               <input
                 type="date"
                 name="fecha"
@@ -430,7 +428,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Segmento contable
               </label>
               <input
@@ -444,7 +442,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Diseño</label>
+              <label className="block text-md font-medium">Diseño</label>
               <select
                 name="diseno"
                 value={formData.diseno || ""}
@@ -458,7 +456,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium">
+              <label className="block text-md font-medium">
                 Tamaño de muestras
               </label>
               <input
@@ -471,7 +469,7 @@ const UnebiKeyModal = ({
               />
             </div>
             <div className="md:col-span-2 lg:col-span-3">
-              <label className="block text-sm font-medium">Observaciones</label>
+              <label className="block text-md font-medium">Observaciones</label>
               <textarea
                 name="observaciones"
                 value={formData.observaciones || ""}
@@ -483,7 +481,7 @@ const UnebiKeyModal = ({
             </div>
 
             <div className="md:col-span-2 lg:col-span-3">
-              <label className="block text-sm font-medium">Historial</label>
+              <label className="block text-md font-medium">Historial</label>
               <textarea
                 name="historial"
                 value={formData.historial || ""}
