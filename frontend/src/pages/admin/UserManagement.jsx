@@ -47,7 +47,9 @@ function UserManagement() {
   const [editingUserId, setEditingUserId] = useState(null);
   // Estados para edición
   const [editedUsername, setEditedUsername] = useState("");
-  const [editedFullName, setEditedFullName] = useState("");
+  const [editedNombre, setEditedNombre] = useState(""); // <-- Añadimos
+  const [editedApellidoPaterno, setEditedApellidoPaterno] = useState(""); // <-- Añadimos
+  const [editedApellidoMaterno, setEditedApellidoMaterno] = useState(""); // <-- Añadimos
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [selectedManagerId, setSelectedManagerId] = useState(null);
 
@@ -98,7 +100,9 @@ function UserManagement() {
     setEditingUserId(user.id);
     setEditedUsername(user.username);
     setSelectedRoles(user.profile?.roles || []);
-    setEditedFullName(user.profile?.full_name || "");
+    setEditedNombre(user.profile?.nombre || "");
+    setEditedApellidoPaterno(user.profile?.apellido_paterno || "");
+    setEditedApellidoMaterno(user.profile?.apellido_materno || "");
     setSelectedManagerId(user.profile?.manager ?? null);
   };
 
@@ -114,7 +118,9 @@ function UserManagement() {
         username: editedUsername,
         profile: {
           roles: selectedRoles,
-          full_name: editedFullName,
+          nombre: editedNombre,
+          apellido_paterno: editedApellidoPaterno,
+          apellido_materno: editedApellidoMaterno,
           manager: selectedManagerId ? parseInt(selectedManagerId, 10) : null,
         },
       })
@@ -334,12 +340,35 @@ function UserManagement() {
                             onChange={(e) => setEditedUsername(e.target.value)}
                             className="input-table-edit bg-gray-700 pl-2"
                           />
-                          {/* **CORREGIDO:** Input para Nombre Completo con estilos dark */}
+
+                          {/* Input para Nombre */}
                           <input
                             type="text"
-                            value={editedFullName}
-                            placeholder="Nombre Completo"
-                            onChange={(e) => setEditedFullName(e.target.value)}
+                            value={editedNombre}
+                            placeholder="Nombre(s)"
+                            onChange={(e) => setEditedNombre(e.target.value)}
+                            className="input-table-edit bg-gray-700 pl-2"
+                          />
+
+                          {/* Input para Apellido Paterno */}
+                          <input
+                            type="text"
+                            value={editedApellidoPaterno}
+                            placeholder="Apellido Paterno"
+                            onChange={(e) =>
+                              setEditedApellidoPaterno(e.target.value)
+                            }
+                            className="input-table-edit bg-gray-700 pl-2"
+                          />
+
+                          {/* Input para Apellido Materno */}
+                          <input
+                            type="text"
+                            value={editedApellidoMaterno}
+                            placeholder="Apellido Materno (Opc.)"
+                            onChange={(e) =>
+                              setEditedApellidoMaterno(e.target.value)
+                            }
                             className="input-table-edit bg-gray-700 pl-2"
                           />
                         </div>
