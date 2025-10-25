@@ -27,11 +27,20 @@ const roleColorMap = {
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-700/50",
   ADMINISTRACION:
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50",
+  COMPRAS:
+    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50",
   default:
     "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600",
 };
 
-const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
+const roleOptions = [
+  "CLINICA",
+  "ADMINISTRACION",
+  "COMERCIAL",
+  "TI",
+  "ADMIN",
+  "COMPRAS",
+];
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -323,7 +332,7 @@ function UserManagement() {
                             value={editedUsername}
                             placeholder="Usuario"
                             onChange={(e) => setEditedUsername(e.target.value)}
-                            className="input-table-edit"
+                            className="input-table-edit bg-gray-700 pl-2"
                           />
                           {/* **CORREGIDO:** Input para Nombre Completo con estilos dark */}
                           <input
@@ -331,7 +340,7 @@ function UserManagement() {
                             value={editedFullName}
                             placeholder="Nombre Completo"
                             onChange={(e) => setEditedFullName(e.target.value)}
-                            className="input-table-edit"
+                            className="input-table-edit bg-gray-700 pl-2"
                           />
                         </div>
                       ) : (
@@ -367,7 +376,7 @@ function UserManagement() {
                                   : null
                               )
                             }
-                            className="input-table-edit pl-7 pr-6 py-1 text-xs appearance-none w-full max-w-[200px]" // Estilos dark ya están en la clase CSS
+                            className="input-table-edit bg-gray-700 pl-7 pr-6 py-1 text-xs appearance-none w-full max-w-[200px]" // Estilos dark ya están en la clase CSS
                           >
                             <option value="">-- Ninguno --</option>
                             {managerOptions.map((option) => (
@@ -545,19 +554,36 @@ function UserManagement() {
         </div>
       </div>
       {/* Styles */}
+      {/* Styles */}
       <style>{`
         .input-table-edit {
-            @apply block w-full px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 shadow-sm
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
-                   focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400;
-                   /* Explicit dark styles added */
+            @apply block w-full px-2 py-1 text-xs rounded border border-gray-300 shadow-sm
+                   bg-white placeholder-gray-400 text-gray-900 /* Ensure text color is set for light mode */
+                   focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500;
         }
-        select.input-table-edit { background-image: none; padding-right: 1.5rem; }
-         .action-button { @apply p-1.5 rounded-full transition-colors duration-150; }
-        .action-button:hover:not(:disabled) { @apply bg-gray-200 dark:bg-gray-700; }
-         .action-button:disabled, .disabled-button { @apply opacity-50 cursor-not-allowed; }
-        .pagination-select { @apply bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500; }
-        .pagination-button { @apply p-1 rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 text-gray-600 dark:text-gray-300; }
+        .dark .input-table-edit {
+             @apply bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 /* Changed bg-gray-800 to bg-gray-700 */
+                    dark:focus:border-indigo-400 dark:focus:ring-indigo-400/50;
+        }
+        select.input-table-edit {
+            background-image: none; /* Quita flecha default si usas ícono */
+            padding-right: 1.5rem; /* Espacio para el ícono si es necesario */
+        }
+         .action-button {
+             @apply p-1.5 rounded-full transition-colors duration-150;
+         }
+        .action-button:hover:not(:disabled) {
+            @apply bg-gray-100 dark:bg-gray-700;
+        }
+         .action-button:disabled, .disabled-button {
+             @apply opacity-50 cursor-not-allowed;
+         }
+        .pagination-select {
+            @apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500;
+        }
+        .pagination-button {
+            @apply p-1 rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 text-gray-600 dark:text-gray-300;
+        }
       `}</style>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, KeySquare } from "lucide-react"; // O un ícono más apropiado
+import { FileText, KeySquare, Archive } from "lucide-react"; // O un ícono más apropiado
 
 function AdministracionDashboard() {
   return (
@@ -43,6 +43,22 @@ function AdministracionDashboard() {
             </div>
             <p className="text-gray-500 dark:text-gray-400">
               Gestiona las claves UNEBI.
+            </p>
+          </Link>
+          <Link
+            to="/administracion/requisiciones/todas" // Nueva ruta
+            className="group block p-6 bg-white dark:bg-gray-800/50 rounded-lg shadow-md hover:shadow-lg dark:shadow-black/30 hover:-translate-y-1 transition-transform border border-gray-200 dark:border-gray-700/50 hover:border-blue-500 hover:dark:border-blue-400"
+          >
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="p-3 rounded-lg bg-orange-600">
+                <Archive className="w-6 h-6 text-white" /> {/* Nuevo ícono */}
+              </div>
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">
+                Historial Requisiciones
+              </h2>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400">
+              Ver todas las requisiciones creadas en el sistema.
             </p>
           </Link>
         </div>

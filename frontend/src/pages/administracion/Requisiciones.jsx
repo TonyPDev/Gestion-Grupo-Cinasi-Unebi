@@ -1,3 +1,4 @@
+// frontend/src/pages/administracion/Requisiciones.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../api";
 import { useAuth } from "../../hooks/useAuth"; // Hook para obtener info del usuario logueado
@@ -15,12 +16,12 @@ import {
   User,
   X, // Asegúrate que X esté importado para el modal
   Loader2, // Para indicar carga en botones
-} from "lucide-react"; // <--- Asegurarse que X está aquí
+} from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import miLogo from "../../assets/logo_cinasi_pdf.png";
 
-// Componente StatusBadge (sin cambios)
+// Componente StatusBadge
 const StatusBadge = ({ status }) => {
   let bgColor = "bg-gray-100 dark:bg-gray-700";
   let textColor = "text-gray-600 dark:text-gray-300";
@@ -87,7 +88,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// Componente DetailsModal (Corregido: botón X)
+// Componente DetailsModal
 const DetailsModal = ({ requisicion, onClose }) => {
   if (!requisicion) return null;
 
@@ -108,7 +109,7 @@ const DetailsModal = ({ requisicion, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm" // Aumentado z-index
+      className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -119,7 +120,7 @@ const DetailsModal = ({ requisicion, onClose }) => {
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             Detalles Requisición: {requisicion.folio}
           </h3>
-          <button /* CORREGIDO: Botón de cierre */
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
           >
@@ -127,15 +128,13 @@ const DetailsModal = ({ requisicion, onClose }) => {
           </button>
         </div>
         <div className="p-6 space-y-4 overflow-y-auto text-sm">
-          {/* ... (resto del contenido del modal sin cambios) ... */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <p>
               <strong className="font-medium text-gray-600 dark:text-gray-400">
                 Estado:
               </strong>{" "}
               <StatusBadge status={requisicion.status} />
-            </p>{" "}
-            {/* Usar req.status */}
+            </p>
             <p>
               <strong className="font-medium text-gray-600 dark:text-gray-400">
                 Tipo:
@@ -152,7 +151,9 @@ const DetailsModal = ({ requisicion, onClose }) => {
               <strong className="font-medium text-gray-600 dark:text-gray-400">
                 Creado por:
               </strong>{" "}
-              {requisicion.creado_por_username || "N/A"}
+              {requisicion.creado_por_full_name ||
+                requisicion.creado_por_username ||
+                "N/A"}
             </p>
             <p>
               <strong className="font-medium text-gray-600 dark:text-gray-400">
@@ -164,7 +165,16 @@ const DetailsModal = ({ requisicion, onClose }) => {
               <strong className="font-medium text-gray-600 dark:text-gray-400">
                 Aprobador Actual:
               </strong>{" "}
-              {requisicion.approver_assigned_username || "N/A"}
+              {requisicion.approver_assigned_full_name ||
+              requisicion.approver_assigned_username
+                ? requisicion.approver_assigned_full_name ||
+                  `@${requisicion.approver_assigned_username}`
+                : requisicion.status === "PENDING_PURCHASING"
+                ? "Pendiente Compras"
+                : requisicion.status === "APPROVED" ||
+                  requisicion.status === "REJECTED"
+                ? "--"
+                : "N/A"}
             </p>
           </div>
           <div className="pt-3 border-t dark:border-gray-700">
@@ -175,7 +185,6 @@ const DetailsModal = ({ requisicion, onClose }) => {
               {requisicion.justificacion}
             </p>
           </div>
-          {/* Historial de Aprobaciones */}
           <div className="pt-3 border-t dark:border-gray-700">
             <h4 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">
               Historial Aprobación:
@@ -183,23 +192,27 @@ const DetailsModal = ({ requisicion, onClose }) => {
             {requisicion.approved_by_manager_username ? (
               <p className="text-green-600 dark:text-green-400 flex items-center gap-1">
                 <CheckCircle size={14} /> Aprobado por Jefe (
-                {requisicion.approved_by_manager_username}) el{" "}
-                {formatDate(requisicion.manager_approval_date)}
+                {requisicion.approved_by_manager_full_name ||
+                  `@${requisicion.approved_by_manager_username}`}
+                ) el {formatDate(requisicion.manager_approval_date)}
               </p>
             ) : (
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                <Clock size={14} /> Pendiente aprobación Jefe
+                {" "}
+                <Clock size={14} /> Pendiente aprobación Jefe{" "}
               </p>
             )}
             {requisicion.approved_by_purchasing_username ? (
               <p className="text-green-600 dark:text-green-400 flex items-center gap-1 mt-1">
                 <CheckCircle size={14} /> Aprobado por Compras (
-                {requisicion.approved_by_purchasing_username}) el{" "}
-                {formatDate(requisicion.purchasing_approval_date)}
+                {requisicion.approved_by_purchasing_full_name ||
+                  `@${requisicion.approved_by_purchasing_username}`}
+                ) el {formatDate(requisicion.purchasing_approval_date)}
               </p>
             ) : (
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
-                <Clock size={14} /> Pendiente aprobación Compras
+                {" "}
+                <Clock size={14} /> Pendiente aprobación Compras{" "}
               </p>
             )}
           </div>
@@ -208,26 +221,23 @@ const DetailsModal = ({ requisicion, onClose }) => {
             requisicion.rejection_reason && (
               <div className="pt-3 border-t dark:border-gray-700">
                 <h4 className="font-semibold mb-2 text-red-700 dark:text-red-400 flex items-center gap-1">
-                  <XCircle size={14} /> Motivo Rechazo:
+                  {" "}
+                  <XCircle size={14} /> Motivo Rechazo:{" "}
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300 bg-red-50 dark:bg-red-900/30 p-3 rounded border border-red-200 dark:border-red-700">
-                  {requisicion.rejection_reason}
+                  {" "}
+                  {requisicion.rejection_reason}{" "}
                 </p>
               </div>
             )}
-          {/* Tabla de Items */}
           <div className="pt-3 border-t dark:border-gray-700">
             <h4 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">
               Items:
             </h4>
             {requisicion.items && requisicion.items.length > 0 ? (
               <div className="overflow-x-auto max-h-60 border rounded dark:border-gray-600">
-                {" "}
-                {/* Añadido max-h y borde */}
                 <table className="w-full text-xs">
                   <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                    {" "}
-                    {/* Sticky header */}
                     <tr>
                       <th className="p-2 text-left font-medium">#</th>
                       <th className="p-2 text-right font-medium">Cantidad</th>
@@ -246,8 +256,7 @@ const DetailsModal = ({ requisicion, onClose }) => {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
-                        </td>{" "}
-                        {/* Formato número */}
+                        </td>
                         <td className="p-2">{item.unidad}</td>
                         <td className="p-2">{item.producto}</td>
                       </tr>
@@ -265,7 +274,8 @@ const DetailsModal = ({ requisicion, onClose }) => {
             onClick={onClose}
             className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 rounded font-medium"
           >
-            Cerrar
+            {" "}
+            Cerrar{" "}
           </button>
         </div>
       </div>
@@ -273,6 +283,7 @@ const DetailsModal = ({ requisicion, onClose }) => {
   );
 };
 
+// Componente principal Requisiciones
 function Requisiciones() {
   const [requisiciones, setRequisiciones] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -303,7 +314,6 @@ function Requisiciones() {
     api
       .get("/api/requisitions/requisitions/")
       .then((res) => {
-        // Ordenar por fecha de creación descendente (más recientes primero)
         const sortedData = res.data.sort(
           (a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion)
         );
@@ -336,7 +346,7 @@ function Requisiciones() {
           : parseFloat(value) || 0
         : value;
     newItems[index] = { ...newItems[index], [name]: finalValue };
-    newItems.forEach((item, i) => (item.partida_num = i + 1)); // Recalcula partida_num
+    newItems.forEach((item, i) => (item.partida_num = i + 1));
     setFormData((prev) => ({ ...prev, items: newItems }));
   };
 
@@ -369,7 +379,7 @@ function Requisiciones() {
     setFormData(initialFormData);
     setCurrentRequisicion(null);
     setShowForm(false);
-    setError(null); // Limpiar errores al cancelar/resetear
+    setError(null);
   };
 
   // --- Submit del Formulario (Crear/Actualizar) ---
@@ -386,24 +396,20 @@ function Requisiciones() {
       );
       return;
     }
-    setError(null); // Limpiar error si la validación pasa
-
+    setError(null);
     const dataToSubmit = { ...formData };
     setIsLoading(true);
-
     const apiCall = currentRequisicion
       ? api.patch(
           `/api/requisitions/requisitions/${currentRequisicion.id}/`,
           dataToSubmit
         )
       : api.post("/api/requisitions/requisitions/", dataToSubmit);
-
     apiCall
       .then((res) => {
-        // Capturar la respuesta para obtener el folio si es nueva
         const action = currentRequisicion ? "actualizada" : "creada";
         const folio =
-          res.data?.folio || currentRequisicion?.folio || "desconocido"; // Obtener folio
+          res.data?.folio || currentRequisicion?.folio || "desconocido";
         alert(`Requisición ${folio} ${action} con éxito.`);
         resetForm();
         fetchRequisiciones();
@@ -413,13 +419,11 @@ function Requisiciones() {
           "Error submitting form:",
           err.response?.data || err.message
         );
-        // Mostrar un mensaje de error más específico si es posible
         const errorData = err.response?.data;
         let errorMessage = "Ocurrió un error al guardar.";
         if (typeof errorData === "string") {
           errorMessage = errorData;
         } else if (errorData && typeof errorData === "object") {
-          // Intenta obtener mensajes de error específicos del serializer
           errorMessage = Object.entries(errorData)
             .map(
               ([key, value]) =>
@@ -428,18 +432,13 @@ function Requisiciones() {
             .join("\n");
         }
         setError(`Error al guardar: ${errorMessage}`);
-        // No ocultar el formulario en caso de error para que el usuario pueda corregir
       })
       .finally(() => setIsLoading(false));
   };
 
   // --- Cargar datos para Editar ---
   const handleEdit = (req) => {
-    // Permitir editar solo si está Rechazada y eres el creador
-    if (req.status !== "REJECTED" || req.creado_por !== loggedInUserId) {
-      alert("Solo puedes editar requisiciones rechazadas que tú creaste.");
-      return;
-    }
+    // No necesita validación aquí, se controla por visibilidad del botón
     setCurrentRequisicion(req);
     const formatDate = (dateString) =>
       dateString ? new Date(dateString).toISOString().split("T")[0] : "";
@@ -450,29 +449,25 @@ function Requisiciones() {
       nombre_solicitante: req.nombre_solicitante,
       items:
         req.items && req.items.length > 0
-          ? req.items.map((item) => ({ ...item })) // Copia simple
+          ? req.items.map((item) => ({ ...item }))
           : [{ partida_num: 1, cantidad: "", unidad: "", producto: "" }],
     });
     setShowForm(true);
-    setError(null); // Limpiar errores al abrir el form de edición
+    setError(null);
   };
 
   // --- Eliminar ---
   const handleDelete = (req) => {
-    // Pasar el objeto req completo
-    // Permitir eliminar si está rechazada/borrador y es creador, O si es Admin
     const canDelete =
       ((req.status === "REJECTED" || req.status === "DRAFT") &&
         req.creado_por === loggedInUserId) ||
       (userRoles && userRoles.includes("ADMIN"));
-
     if (!canDelete) {
       alert(
         "No tienes permiso para eliminar esta requisición en su estado actual."
       );
       return;
     }
-
     if (
       window.confirm(
         `¿Estás seguro de eliminar la requisición ${req.folio}? Esta acción no se puede deshacer.`
@@ -509,7 +504,7 @@ function Requisiciones() {
       .post(`/api/requisitions/requisitions/${id}/approve_manager/`)
       .then((res) => {
         alert("Requisición aprobada por jefe.");
-        fetchRequisiciones(); // Recargar para ver el cambio de estado
+        fetchRequisiciones();
       })
       .catch((err) =>
         alert(
@@ -555,9 +550,7 @@ function Requisiciones() {
     api
       .post(
         `/api/requisitions/requisitions/${requisicionToReject.id}/reject/`,
-        {
-          rejection_reason: rejectionReason,
-        }
+        { rejection_reason: rejectionReason }
       )
       .then((res) => {
         alert(`Requisición ${requisicionToReject.folio} rechazada.`);
@@ -581,7 +574,7 @@ function Requisiciones() {
     setShowDetailsModal(true);
   };
 
-  // --- Funciones PDF (sin cambios aquí, ya estaban correctas) ---
+  // --- Funciones PDF (CON LA MODIFICACIÓN DE FIRMAS) ---
   const createPDFDocument = (requisicionData) => {
     const doc = new jsPDF();
     const margin = 15;
@@ -589,21 +582,17 @@ function Requisiciones() {
     const pageHeight = doc.internal.pageSize.height;
     const usableWidth = pageWidth - margin * 2;
     let y = margin;
-    let logoAdded = false;
 
     // Encabezado con LOGO
     try {
       if (miLogo) {
         const img = new Image();
         img.src = miLogo;
-        // Calculamos proporciones (asumimos que el logo base tiene cierto ancho/alto)
-        const originalWidth = img.width || 200; // Ancho original o default
-        const originalHeight = img.height || 50; // Alto original o default
-        const logoWidth = 60; // Ancho deseado en PDF
-        const logoHeight = (originalHeight * logoWidth) / originalWidth; // Alto proporcional
-
+        const originalWidth = img.width || 200;
+        const originalHeight = img.height || 50;
+        const logoWidth = 60;
+        const logoHeight = (originalHeight * logoWidth) / originalWidth;
         doc.addImage(miLogo, "PNG", margin, y, logoWidth, logoHeight);
-        logoAdded = true;
         y += logoHeight + 3;
       } else {
         y += 15;
@@ -615,15 +604,13 @@ function Requisiciones() {
       y += 15;
     }
 
-    // Código FRG
+    // Código FRG, Folio, Fecha, Título, Checkboxes
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    const codeStartY = margin + 5; // Ajustar Y si hay logo
+    const codeStartY = margin + 5;
     doc.text("FRG-001_AD-006_V01", pageWidth - margin, codeStartY, {
       align: "right",
     });
-
-    // Folio y Fecha
     doc.setFontSize(10);
     doc.text(`Folio: ${requisicionData.folio || "N/A"}`, margin, y);
     const fechaSolicitudStr = requisicionData.fecha_solicitud
@@ -638,8 +625,6 @@ function Requisiciones() {
       { align: "right" }
     );
     y += 8;
-
-    // Título Principal
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text(
@@ -649,8 +634,6 @@ function Requisiciones() {
       { align: "center" }
     );
     y += 8;
-
-    // Checkboxes
     const tipoY = y;
     const drawCheckbox = (x, label, checked) => {
       doc.rect(x, tipoY - 3.5, 4, 4);
@@ -664,26 +647,31 @@ function Requisiciones() {
     };
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    const widthMaterial = 4 + 2 + doc.getTextWidth("Material");
-    const widthEquipo = 4 + 2 + doc.getTextWidth("Equipo/Instrumento");
-    const widthServicio = 4 + 2 + doc.getTextWidth("Servicio");
-    const totalCheckWidth = widthMaterial + widthEquipo + widthServicio + 20;
-    let startX = (pageWidth - totalCheckWidth) / 2;
-    drawCheckbox(
-      startX,
-      "Material",
+
+    // Calcular anchos totales para centrar
+    const labelMaterial = "Material";
+    const labelEquipo = "Equipo/Instrumento";
+    const labelServicio = "Servicio";
+    const widthMaterialBox = 4 + 2 + doc.getTextWidth(labelMaterial);
+    const widthEquipoBox = 4 + 2 + doc.getTextWidth(labelEquipo);
+    const widthServicioBox = 4 + 2 + doc.getTextWidth(labelServicio);
+    const totalCheckboxWidth =
+      widthMaterialBox + 10 + widthEquipoBox + 10 + widthServicioBox;
+    const startXCentered = (pageWidth - totalCheckboxWidth) / 2;
+
+    const widthMaterial = drawCheckbox(
+      startXCentered,
+      labelMaterial,
       requisicionData.tipo_requisicion === "Material"
     );
-    startX += widthMaterial + 10;
-    drawCheckbox(
-      startX,
-      "Equipo/Instrumento",
+    const widthEquipo = drawCheckbox(
+      startXCentered + widthMaterial + 10,
+      labelEquipo,
       requisicionData.tipo_requisicion === "Equipo/Instrumento"
     );
-    startX += widthEquipo + 10;
     drawCheckbox(
-      startX,
-      "Servicio",
+      startXCentered + widthMaterial + widthEquipo + 20,
+      labelServicio,
       requisicionData.tipo_requisicion === "Servicio"
     );
     y = tipoY + 10;
@@ -697,7 +685,7 @@ function Requisiciones() {
       Number(item.cantidad).toLocaleString("es-MX", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      }), // Formatear cantidad
+      }),
       item.unidad,
       item.producto,
     ]);
@@ -732,19 +720,18 @@ function Requisiciones() {
         0: { cellWidth: 15, halign: "center" },
         1: { cellWidth: 20, halign: "right" },
         2: { cellWidth: 20, halign: "center" },
-        3: { cellWidth: "auto" }, // Ancho automático para descripción
+        3: { cellWidth: "auto" },
       },
       didParseCell: function (data) {
-        // Centrar verticalmente el texto en todas las celdas
         data.cell.styles.valign = "middle";
       },
       didDrawPage: (data) => {
         if (data.cursor && data.cursor.y > y) y = data.cursor.y;
       },
     });
-    y = doc.lastAutoTable.finalY + 5; // Obtener Y después de la tabla
+    y = doc.lastAutoTable.finalY + 5;
 
-    // Nota
+    // Nota y Justificación
     const textPadding = 3;
     const textLineHeightNote = 3.5;
     doc.setFontSize(8);
@@ -761,11 +748,9 @@ function Requisiciones() {
     doc.setLineWidth(0.1);
     doc.rect(margin, y, usableWidth, notaHeight);
     doc.setDrawColor(0);
-    doc.setLineWidth(0.2); // Restaurar valores por defecto
+    doc.setLineWidth(0.2);
     doc.text(notaLines, margin + textPadding, y + textPadding + 3);
     y += notaHeight + 4;
-
-    // Justificación
     const justificationYStart = y;
     const titlePaddingY = 4;
     const textLineHeightJust = 4;
@@ -799,130 +784,110 @@ function Requisiciones() {
     doc.text(justificationLines, margin + textPadding, justificationTextY);
     y = justificationYStart + justificationHeight + 6;
 
-    // Firmas
-    const signatureBoxHeight = 30;
-    const signatureBoxWidth = (usableWidth - 10) / 2;
-    const minimumYForSignatures = pageHeight - margin - signatureBoxHeight - 30; // Margen inf + espacio recibe
+    // --- SECCIÓN DE FIRMAS MODIFICADA (2 ARRIBA, 1 ABAJO - MISMO TAMAÑO) ---
+    const signatureBoxHeight = 35; // Altura más grande para mejor visibilidad
+    const signatureBoxWidth = (usableWidth - 10) / 2; // Mismo ancho para todas
+    const minimumYForSignatures =
+      pageHeight - margin - signatureBoxHeight * 2 - 20;
     const signatureY = Math.max(y + 8, minimumYForSignatures);
+
+    // Dibuja las 2 cajas superiores (Solicitado y Autorizado por Jefe)
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.1);
-    doc.rect(margin, signatureY, signatureBoxWidth, signatureBoxHeight); // Solicitado
-    doc.rect(
-      margin + signatureBoxWidth + 10,
-      signatureY,
-      signatureBoxWidth,
-      signatureBoxHeight
-    ); // Autorizado Jefe
+    const box1X = margin; // Solicitado por
+    const box2X = margin + signatureBoxWidth + 10; // Autorizado por Jefe
+    doc.rect(box1X, signatureY, signatureBoxWidth, signatureBoxHeight);
+    doc.rect(box2X, signatureY, signatureBoxWidth, signatureBoxHeight);
+
+    // Dibuja la caja inferior (Compras) - mismo ancho, centrada
+    const bottomSignatureY = signatureY + signatureBoxHeight + 6;
+    const box3X = margin + (usableWidth - signatureBoxWidth) / 2; // Centrada
+    doc.rect(box3X, bottomSignatureY, signatureBoxWidth, signatureBoxHeight);
     doc.setDrawColor(0);
     doc.setLineWidth(0.2);
 
-    let currentYsig = signatureY + 4;
-    // Solicitado
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text("SOLICITADO POR:", margin + 5, currentYsig);
-    currentYsig += 15; // Espacio para firma
-    doc.setLineWidth(0.1);
-    doc.line(
-      margin + 5,
-      currentYsig,
-      margin + signatureBoxWidth - 5,
-      currentYsig
-    );
-    doc.setLineWidth(0.2);
-    currentYsig += 4;
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "normal");
-    const fechaFirmaS = "__________"; // Ya no tenemos esta fecha separada
-    doc.text(
-      `${
-        requisicionData.nombre_solicitante || "________________"
-      } ${fechaFirmaS}`,
-      margin + 5,
-      currentYsig
-    );
-    currentYsig += 4;
-    doc.setFontSize(7);
-    doc.text("NOMBRE, FIRMA Y FECHA", margin + 5, currentYsig);
-
-    // Autorizado Jefe
-    currentYsig = signatureY + 4;
-    const autorizaX = margin + signatureBoxWidth + 10 + 5;
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text("AUTORIZADO POR: (JEFE INMEDIATO)", autorizaX, currentYsig);
-    currentYsig += 15;
-    doc.setLineWidth(0.1);
-    doc.line(
-      autorizaX,
-      currentYsig,
-      autorizaX + signatureBoxWidth - 10,
-      currentYsig
-    );
-    doc.setLineWidth(0.2);
-    currentYsig += 4;
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "normal");
-    const managerName =
-      requisicionData.approved_by_manager_username || "________________";
-    const managerDate = requisicionData.manager_approval_date
-      ? new Date(requisicionData.manager_approval_date).toLocaleDateString(
-          "es-MX",
-          { timeZone: "UTC" }
-        )
-      : "__________";
-    doc.text(`${managerName} ${managerDate}`, autorizaX, currentYsig);
-    currentYsig += 4;
-    doc.setFontSize(7);
-    doc.text("NOMBRE, FIRMA Y FECHA", autorizaX, currentYsig);
-
-    // Recibe Compras
-    const recibeBoxHeight = 25;
-    const recibeBoxWidth = 90;
-    const recibeBoxX = (pageWidth - recibeBoxWidth) / 2;
-    const recibeBoxY = signatureY + signatureBoxHeight + 5;
-    if (recibeBoxY + recibeBoxHeight < pageHeight - margin - 5) {
-      // Margen inferior
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.1);
-      doc.rect(recibeBoxX, recibeBoxY, recibeBoxWidth, recibeBoxHeight);
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.2);
-      currentYsig = recibeBoxY + 4;
-      doc.setFontSize(8);
+    const drawSignatureContent = (
+      boxX,
+      boxY,
+      boxWidth,
+      title,
+      name,
+      date,
+      isDateField = false
+    ) => {
+      let currentYsig = boxY + 5;
+      doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
-      doc.text("RECIBE Responsable de Compras:", recibeBoxX + 5, currentYsig);
-      currentYsig += 10;
+      // Split title if too long for the box width
+      const titleLines = doc.splitTextToSize(title, boxWidth - 10);
+      doc.text(titleLines, boxX + 5, currentYsig);
+      currentYsig += titleLines.length * 4 + 12; // Adjust space based on title lines
+
       doc.setLineWidth(0.1);
-      doc.line(
-        recibeBoxX + 5,
-        currentYsig,
-        recibeBoxX + recibeBoxWidth - 5,
-        currentYsig
-      );
+      doc.line(boxX + 5, currentYsig, boxX + boxWidth - 5, currentYsig);
       doc.setLineWidth(0.2);
       currentYsig += 4;
-      doc.setFontSize(7);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
-      const purchaserName =
-        requisicionData.approved_by_purchasing_username || "";
-      const purchaserDate = requisicionData.purchasing_approval_date
-        ? new Date(requisicionData.purchasing_approval_date).toLocaleDateString(
-            "es-MX",
-            { timeZone: "UTC" }
-          )
-        : "";
-      // Escribir nombre y fecha si existen, si no, el placeholder
-      if (purchaserName) {
-        doc.text(
-          `${purchaserName} ${purchaserDate}`,
-          recibeBoxX + 5,
-          currentYsig
-        );
+
+      const nameToShow = name || "________________";
+      // Use formatDateOnly for date fields, formatDate for datetime fields
+      const dateToShow = date
+        ? isDateField
+          ? new Date(date + "T00:00:00Z").toLocaleDateString("es-MX", {
+              timeZone: "UTC",
+            }) // Treat as date only
+          : new Date(date).toLocaleDateString("es-MX", { timeZone: "UTC" }) // Treat as datetime (just date part)
+        : "__________";
+
+      // Check if name and date fit on one line, otherwise split
+      const nameDateText = `${nameToShow} ${dateToShow}`;
+      if (doc.getTextWidth(nameDateText) > boxWidth - 10) {
+        doc.text(nameToShow, boxX + 5, currentYsig);
+        currentYsig += 4; // Move down for the date
+        doc.text(dateToShow, boxX + 5, currentYsig);
       } else {
-        doc.text("NOMBRE, FIRMA Y FECHA", recibeBoxX + 5, currentYsig);
+        doc.text(nameDateText, boxX + 5, currentYsig);
       }
-    }
+      currentYsig += 4.5; // Space before the label
+      doc.setFontSize(7);
+      doc.text("NOMBRE, FIRMA Y FECHA", boxX + 5, currentYsig);
+    };
+
+    // Llama a la función para las 2 cajas superiores
+    drawSignatureContent(
+      box1X,
+      signatureY,
+      signatureBoxWidth,
+      "SOLICITADO POR:",
+      requisicionData.nombre_solicitante,
+      requisicionData.fecha_solicitud,
+      true
+    ); // Mark as a date field
+
+    drawSignatureContent(
+      box2X,
+      signatureY,
+      signatureBoxWidth,
+      "AUTORIZADO POR: (JEFE INMEDIATO)",
+      requisicionData.approved_by_manager_full_name ||
+        requisicionData.approved_by_manager_username,
+      requisicionData.manager_approval_date
+    ); // This is DateTimeField
+
+    // Llama a la función para la caja inferior (Compras) - centrada
+    drawSignatureContent(
+      box3X,
+      bottomSignatureY,
+      signatureBoxWidth,
+      "AUTORIZADO POR: (COMPRAS)",
+      requisicionData.approved_by_purchasing_full_name ||
+        requisicionData.approved_by_purchasing_username,
+      requisicionData.purchasing_approval_date
+    ); // This is DateTimeField
+
+    // --- FIN SECCIÓN DE FIRMAS MODIFICADA ---
+
     return doc;
   };
 
@@ -939,8 +904,6 @@ function Requisiciones() {
   const handlePreviewPDF = (requisicionData) => {
     try {
       const doc = createPDFDocument(requisicionData);
-      // Usar output('bloburl') o output('dataurlnewwindow')
-      // bloburl es generalmente preferido
       const blobURL = doc.output("bloburl");
       window.open(blobURL, "_blank");
     } catch (error) {
@@ -952,15 +915,14 @@ function Requisiciones() {
   // --- Renderizado ---
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {" "}
-      {/* Fondo a toda la pantalla */}
       <div className="max-w-7xl mx-auto">
-        {/* ... (Encabezado y botón Nueva sin cambios) ... */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
+            {" "}
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Gestión de Requisiciones
-            </h1>
+              {" "}
+              Gestión de Requisiciones{" "}
+            </h1>{" "}
           </div>
           {!showForm && (
             <button
@@ -968,44 +930,46 @@ function Requisiciones() {
                 setCurrentRequisicion(null);
                 setFormData(initialFormData);
                 setShowForm(true);
-                setError(null); // Limpiar errores al abrir form nuevo
+                setError(null);
               }}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors shadow hover:shadow-md"
             >
-              <Plus size={18} /> Nueva Requisición
+              {" "}
+              <Plus size={18} /> Nueva Requisición{" "}
             </button>
           )}
         </div>
 
-        {/* Mensaje de error global */}
         {error && !showForm && (
           <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded border border-red-300 dark:border-red-700 text-sm">
-            {error}
+            {" "}
+            {error}{" "}
           </div>
         )}
 
         {/* --- Formulario --- */}
         {showForm && (
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6 border dark:border-gray-700">
+            {/* ... Contenido del formulario (sin cambios) ... */}
             <h2 className="text-xl font-semibold mb-5 text-gray-800 dark:text-white border-b pb-3 dark:border-gray-700">
+              {" "}
               {currentRequisicion ? "Editar" : "Crear"} Requisición{" "}
-              {currentRequisicion?.folio ? `(${currentRequisicion.folio})` : ""}
+              {currentRequisicion?.folio ? `(${currentRequisicion.folio})` : ""}{" "}
             </h2>
-            {/* Mensaje de error dentro del form */}
             {error && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded border border-red-300 dark:border-red-700 text-sm">
                 {error}
               </div>
             )}
-
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* ... (resto del form sin cambios) ... */}
               {/* Campos Principales */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
+                  {" "}
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Fecha Solicitud <span className="text-red-500">*</span>
-                  </label>
+                    {" "}
+                    Fecha Solicitud <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
                   <input
                     type="date"
                     name="fecha_solicitud"
@@ -1013,12 +977,14 @@ function Requisiciones() {
                     onChange={handleInputChange}
                     required
                     className="mt-1 input-style"
-                  />
+                  />{" "}
                 </div>
                 <div>
+                  {" "}
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Tipo <span className="text-red-500">*</span>
-                  </label>
+                    {" "}
+                    Tipo <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
                   <select
                     name="tipo_requisicion"
                     value={formData.tipo_requisicion}
@@ -1026,17 +992,23 @@ function Requisiciones() {
                     required
                     className="mt-1 input-style"
                   >
-                    <option value="Material">Material</option>
+                    {" "}
+                    <option value="Material">Material</option>{" "}
                     <option value="Equipo/Instrumento">
-                      Equipo/Instrumento
-                    </option>
-                    <option value="Servicio">Servicio</option>
-                  </select>
+                      {" "}
+                      Equipo/Instrumento{" "}
+                    </option>{" "}
+                    <option value="Servicio">Servicio</option>{" "}
+                  </select>{" "}
                 </div>
                 <div>
+                  {" "}
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nombre Solicitante <span className="text-red-500">*</span>
-                  </label>
+                    {" "}
+                    Nombre Solicitante <span className="text-red-500">
+                      *
+                    </span>{" "}
+                  </label>{" "}
                   <input
                     type="text"
                     name="nombre_solicitante"
@@ -1045,13 +1017,15 @@ function Requisiciones() {
                     placeholder="Tu nombre completo"
                     required
                     className="mt-1 input-style"
-                  />
+                  />{" "}
                 </div>
               </div>
               <div>
+                {" "}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Justificación <span className="text-red-500">*</span>
-                </label>
+                  {" "}
+                  Justificación <span className="text-red-500">*</span>{" "}
+                </label>{" "}
                 <textarea
                   name="justificacion"
                   value={formData.justificacion}
@@ -1060,23 +1034,24 @@ function Requisiciones() {
                   rows="3"
                   placeholder="Describe por qué se necesita esto..."
                   className="mt-1 input-style"
-                ></textarea>
+                ></textarea>{" "}
               </div>
 
               {/* Items */}
               <h3 className="text-lg font-semibold border-t pt-4 mt-4 dark:border-gray-700 text-gray-800 dark:text-white">
-                Items Solicitados
+                {" "}
+                Items Solicitados{" "}
               </h3>
               {formData.items.map((item, index) => (
                 <div
-                  key={index} // Usar index como key temporal si no hay IDs únicos aún
+                  key={index}
                   className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end border p-4 rounded-md dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30"
                 >
-                  {/* Partida Num */}
                   <div className="md:col-span-1">
+                    {" "}
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
                       #
-                    </label>
+                    </label>{" "}
                     <input
                       type="number"
                       name="partida_num"
@@ -1084,30 +1059,30 @@ function Requisiciones() {
                       readOnly
                       className="mt-1 input-style text-center bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
                       tabIndex={-1}
-                    />
+                    />{" "}
                   </div>
-                  {/* Cantidad */}
                   <div className="md:col-span-2">
+                    {" "}
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
                       Cantidad*
-                    </label>
+                    </label>{" "}
                     <input
                       type="number"
-                      step="0.01"
-                      min="0.01"
+                      step="1"
+                      min="1"
                       name="cantidad"
                       value={item.cantidad}
                       onChange={(e) => handleItemChange(index, e)}
                       placeholder="Ej: 1.00"
                       required
                       className="mt-1 input-style"
-                    />
+                    />{" "}
                   </div>
-                  {/* Unidad */}
                   <div className="md:col-span-2">
+                    {" "}
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
                       Unidad*
-                    </label>
+                    </label>{" "}
                     <input
                       type="text"
                       name="unidad"
@@ -1116,13 +1091,13 @@ function Requisiciones() {
                       placeholder="Ej: pza, caja, L"
                       required
                       className="mt-1 input-style"
-                    />
+                    />{" "}
                   </div>
-                  {/* Producto/Descripción */}
                   <div className="md:col-span-6">
+                    {" "}
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
                       Producto/Descripción*
-                    </label>
+                    </label>{" "}
                     <input
                       type="text"
                       name="producto"
@@ -1131,10 +1106,10 @@ function Requisiciones() {
                       placeholder="Detalla el producto o servicio"
                       required
                       className="mt-1 input-style"
-                    />
+                    />{" "}
                   </div>
-                  {/* Botón Eliminar Item */}
                   <div className="md:col-span-1 flex justify-end self-center pt-3 md:pt-0">
+                    {" "}
                     {formData.items.length > 1 && (
                       <button
                         type="button"
@@ -1142,9 +1117,10 @@ function Requisiciones() {
                         className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50"
                         title="Eliminar Item"
                       >
-                        <Trash2 size={18} />
+                        {" "}
+                        <Trash2 size={18} />{" "}
                       </button>
-                    )}
+                    )}{" "}
                   </div>
                 </div>
               ))}
@@ -1153,104 +1129,59 @@ function Requisiciones() {
                 onClick={addItem}
                 className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium py-1"
               >
-                <Plus size={16} /> Añadir Item
+                {" "}
+                <Plus size={16} /> Añadir Item{" "}
               </button>
 
-              {/* Botones de acción del formulario */}
+              {/* Botones formulario */}
               <div className="flex justify-end gap-3 pt-5 border-t dark:border-gray-700">
                 <button
                   type="button"
                   onClick={resetForm}
                   className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 rounded-md font-medium transition-colors"
                 >
-                  Cancelar
+                  {" "}
+                  Cancelar{" "}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
+                  {" "}
                   {isLoading ? (
                     <Loader2 size={16} className="animate-spin" />
-                  ) : null}
+                  ) : null}{" "}
                   {isLoading
                     ? "Guardando..."
                     : currentRequisicion
                     ? "Actualizar"
-                    : "Guardar"}
+                    : "Guardar"}{" "}
                 </button>
               </div>
             </form>
-            {/* CORREGIDO: Quitar jsx y global de style */}
-            <style>{`
-              .input-style {
-                display: block;
-                width: 100%;
-                padding: 0.5rem 0.75rem; /* Ajuste padding */
-                font-size: 0.875rem; /* text-sm */
-                line-height: 1.25rem;
-                border-radius: 0.375rem; /* rounded-md */
-                border-width: 1px;
-                border-color: #d1d5db; /* border-gray-300 */
-                box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-                background-color: white;
-                color: #1f2937; /* text-gray-800 */
-              }
-              .dark .input-style {
-                background-color: #374151; /* dark:bg-gray-700 */
-                border-color: #4b5563; /* dark:border-gray-600 */
-                color: #f3f4f6; /* dark:text-gray-100 */
-              }
-              .input-style::placeholder {
-                color: #9ca3af; /* placeholder-gray-400 */
-              }
-              .dark .input-style::placeholder {
-                color: #6b7280; /* dark:placeholder-gray-500 */
-              }
-              .input-style:focus {
-                outline: 2px solid transparent;
-                outline-offset: 2px;
-                border-color: #6366f1; /* focus:border-indigo-500 */
-                box-shadow: 0 0 0 2px #a5b4fc; /* focus:ring-indigo-300 */
-              }
-              .dark .input-style:focus {
-                border-color: #818cf8; /* dark:focus:border-indigo-400 */
-                 box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5); /* dark:focus:ring-indigo-400 */
-              }
-               .input-style:disabled {
-                    cursor: not-allowed;
-                    background-color: #f3f4f6; /* bg-gray-100 */
-                    color: #9ca3af; /* text-gray-400 */
-               }
-               .dark .input-style:disabled {
-                   background-color: #1f2937; /* dark:bg-gray-800 */
-                   color: #6b7280; /* dark:text-gray-500 */
-               }
-               textarea.input-style {
-                  min-height: 70px; /* Altura mínima para textareas */
-              }
-            `}</style>
+            <style>{`.input-style { display: block; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.375rem; border-width: 1px; border-color: #d1d5db; box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05); background-color: white; color: #1f2937; } .dark .input-style { background-color: #374151; border-color: #4b5563; color: #f3f4f6; } .input-style::placeholder { color: #9ca3af; } .dark .input-style::placeholder { color: #6b7280; } .input-style:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #6366f1; box-shadow: 0 0 0 2px #a5b4fc; } .dark .input-style:focus { border-color: #818cf8; box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5); } .input-style:disabled { cursor: not-allowed; background-color: #f3f4f6; color: #9ca3af; } .dark .input-style:disabled { background-color: #1f2937; color: #6b7280; } textarea.input-style { min-height: 70px; }`}</style>
           </div>
         )}
 
         {/* --- Tabla de Requisiciones --- */}
         {!showForm && (
-          // ... (El div contenedor de la tabla y la tabla misma están bien) ...
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <div className="overflow-x-auto">
+              {/* ... Contenido de la tabla (sin cambios) ... */}
               <table className="w-full text-sm text-left min-w-[700px]">
-                {" "}
-                {/* min-w para evitar compresión excesiva */}
                 <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {" "}
                   <tr>
-                    <th className="p-3 font-semibold">Folio</th>
-                    <th className="p-3 font-semibold">Fecha</th>
-                    <th className="p-3 font-semibold">Tipo</th>
-                    <th className="p-3 font-semibold">Solicitante</th>
-                    <th className="p-3 font-semibold">Estado</th>
-                    <th className="p-3 font-semibold">Aprobador Actual</th>
-                    <th className="p-3 font-semibold text-center">Acciones</th>
-                  </tr>
+                    {" "}
+                    <th className="p-3 font-semibold">Folio</th>{" "}
+                    <th className="p-3 font-semibold">Fecha</th>{" "}
+                    <th className="p-3 font-semibold">Tipo</th>{" "}
+                    <th className="p-3 font-semibold">Solicitante</th>{" "}
+                    <th className="p-3 font-semibold">Estado</th>{" "}
+                    <th className="p-3 font-semibold">Aprobador Actual</th>{" "}
+                    <th className="p-3 font-semibold text-center">Acciones</th>{" "}
+                  </tr>{" "}
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300">
                   {isLoading && (
@@ -1278,18 +1209,19 @@ function Requisiciones() {
                       const canApprovePurchasing =
                         req.status === "PENDING_PURCHASING" &&
                         userRoles &&
-                        userRoles.includes("ADMINISTRACION");
+                        (userRoles.includes("ADMINISTRACION") ||
+                          userRoles.includes("COMPRAS")); // Ajusta si usas rol COMPRAS
                       const canReject =
                         canApproveManager || canApprovePurchasing;
                       const canEdit =
-                        req.status === "REJECTED" &&
-                        req.creado_por === loggedInUserId; // CORREGIDO: Lógica de Edición
+                        (req.status === "REJECTED" ||
+                          req.status === "PENDING_MANAGER") &&
+                        req.creado_por === loggedInUserId;
                       const canDelete =
                         ((req.status === "REJECTED" ||
                           req.status === "DRAFT") &&
                           req.creado_por === loggedInUserId) ||
                         (userRoles && userRoles.includes("ADMIN"));
-
                       return (
                         <tr
                           key={req.id}
@@ -1313,16 +1245,23 @@ function Requisiciones() {
                             <StatusBadge status={req.status} />
                           </td>
                           <td className="p-3 whitespace-nowrap">
-                            {req.approver_assigned_username || "--"}
+                            {" "}
+                            {req.approver_assigned_full_name ||
+                            req.approver_assigned_username
+                              ? req.approver_assigned_full_name ||
+                                `@${req.approver_assigned_username}`
+                              : "--"}{" "}
                           </td>
                           <td className="p-3 text-center">
+                            {" "}
                             <div className="flex justify-center items-center gap-1.5">
                               <button
                                 onClick={() => openDetailsModal(req)}
                                 className="action-button text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
                                 title="Ver Detalles"
                               >
-                                <Info size={16} />
+                                {" "}
+                                <Info size={16} />{" "}
                               </button>
                               {canApproveManager && (
                                 <button
@@ -1330,7 +1269,8 @@ function Requisiciones() {
                                   className="action-button text-green-500 hover:text-green-700 dark:hover:text-green-400"
                                   title="Aprobar (Jefe)"
                                 >
-                                  <CheckCircle size={18} />
+                                  {" "}
+                                  <CheckCircle size={18} />{" "}
                                 </button>
                               )}
                               {canApprovePurchasing && (
@@ -1341,7 +1281,8 @@ function Requisiciones() {
                                   className="action-button text-green-500 hover:text-green-700 dark:hover:text-green-400"
                                   title="Aprobar (Compras)"
                                 >
-                                  <CheckCircle size={18} />
+                                  {" "}
+                                  <CheckCircle size={18} />{" "}
                                 </button>
                               )}
                               {canReject && (
@@ -1350,7 +1291,8 @@ function Requisiciones() {
                                   className="action-button text-red-500 hover:text-red-700 dark:hover:text-red-400"
                                   title="Rechazar"
                                 >
-                                  <XCircle size={18} />
+                                  {" "}
+                                  <XCircle size={18} />{" "}
                                 </button>
                               )}
                               {canEdit && (
@@ -1359,7 +1301,8 @@ function Requisiciones() {
                                   className="action-button text-blue-500 hover:text-blue-700 dark:hover:text-blue-400"
                                   title="Editar"
                                 >
-                                  <Edit size={16} />
+                                  {" "}
+                                  <Edit size={16} />{" "}
                                 </button>
                               )}
                               {(canApproveManager ||
@@ -1373,14 +1316,16 @@ function Requisiciones() {
                                 className="action-button text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
                                 title="Vista Previa PDF"
                               >
-                                <Eye size={16} />
+                                {" "}
+                                <Eye size={16} />{" "}
                               </button>
                               <button
                                 onClick={() => handleDownloadPDF(req)}
                                 className="action-button text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
                                 title="Descargar PDF"
                               >
-                                <Download size={16} />
+                                {" "}
+                                <Download size={16} />{" "}
                               </button>
                               {canDelete && (
                                 <button
@@ -1388,10 +1333,11 @@ function Requisiciones() {
                                   className="action-button text-red-500 hover:text-red-700 dark:hover:text-red-400"
                                   title="Eliminar"
                                 >
-                                  <Trash2 size={16} />
+                                  {" "}
+                                  <Trash2 size={16} />{" "}
                                 </button>
                               )}
-                            </div>
+                            </div>{" "}
                           </td>
                         </tr>
                       );
@@ -1399,72 +1345,82 @@ function Requisiciones() {
                 </tbody>
               </table>
             </div>
-          </div> /* Fin div tabla */
+          </div>
         )}
 
-        {/* --- Modales --- */}
+        {/* --- Modales (sin cambios) --- */}
         {showRejectModal && requisicionToReject && (
+          // ... Contenido del modal de rechazo ...
           <div
             className="fixed inset-0 bg-black bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm"
             onClick={() => setShowRejectModal(false)}
           >
-            {" "}
-            {/* Mayor z-index */}
             <div
               className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                {" "}
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Rechazar Requisición: {requisicionToReject.folio}
-                </h3>
+                  {" "}
+                  Rechazar Requisición: {requisicionToReject.folio}{" "}
+                </h3>{" "}
                 <button
                   onClick={() => setShowRejectModal(false)}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <X size={20} />
-                </button>
+                  {" "}
+                  <X size={20} />{" "}
+                </button>{" "}
               </div>
               <div className="p-6 space-y-3">
+                {" "}
                 <label
                   htmlFor="rejectionReason"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Motivo del Rechazo <span className="text-red-500">*</span>
-                </label>
+                  {" "}
+                  Motivo del Rechazo <span className="text-red-500">
+                    *
+                  </span>{" "}
+                </label>{" "}
                 <textarea
                   id="rejectionReason"
                   rows="4"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full input-style" // Reutiliza la clase de estilo
+                  className="w-full input-style"
                   placeholder="Describe por qué se rechaza esta requisición..."
-                />
+                />{" "}
                 {!rejectionReason.trim() && (
                   <p className="text-xs text-red-500">
-                    El motivo es obligatorio.
+                    {" "}
+                    El motivo es obligatorio.{" "}
                   </p>
-                )}
+                )}{" "}
               </div>
               <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t dark:border-gray-700 flex justify-end gap-3">
+                {" "}
                 <button
                   type="button"
                   onClick={() => setShowRejectModal(false)}
                   className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 rounded-md font-medium"
                 >
-                  Cancelar
-                </button>
+                  {" "}
+                  Cancelar{" "}
+                </button>{" "}
                 <button
                   type="button"
                   onClick={handleRejectSubmit}
                   disabled={isLoading || !rejectionReason.trim()}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-semibold disabled:opacity-50 flex items-center gap-2"
                 >
+                  {" "}
                   {isLoading ? (
                     <Loader2 size={16} className="animate-spin" />
-                  ) : null}
-                  {isLoading ? "Rechazando..." : "Confirmar Rechazo"}
-                </button>
+                  ) : null}{" "}
+                  {isLoading ? "Rechazando..." : "Confirmar Rechazo"}{" "}
+                </button>{" "}
               </div>
             </div>
           </div>
@@ -1476,35 +1432,8 @@ function Requisiciones() {
           />
         )}
       </div>
-      {/* Estilos globales y para botones de acción */}
-      <style>{`
-            .action-button {
-                padding: 0.25rem; /* p-1 */
-                border-radius: 9999px; /* rounded-full */
-                transition: background-color 0.15s ease-in-out;
-            }
-            .action-button:hover {
-                background-color: rgba(128, 128, 128, 0.1); /* Ligero fondo gris al hacer hover */
-            }
-            .dark .action-button:hover {
-                 background-color: rgba(255, 255, 255, 0.1); /* Ligero fondo blanco al hacer hover en dark mode */
-            }
-
-            /* Estilos de input (repetidos de arriba para asegurar alcance global si es necesario) */
-             .input-style {
-                display: block; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; line-height: 1.25rem;
-                border-radius: 0.375rem; border-width: 1px; border-color: #d1d5db; /* gray-300 */
-                box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05); background-color: white; color: #1f2937; /* gray-800 */
-              }
-              .dark .input-style { background-color: #374151; /* gray-700 */ border-color: #4b5563; /* gray-600 */ color: #f3f4f6; /* gray-100 */ }
-              .input-style::placeholder { color: #9ca3af; /* gray-400 */ }
-              .dark .input-style::placeholder { color: #6b7280; /* gray-500 */ }
-              .input-style:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #6366f1; /* indigo-500 */ box-shadow: 0 0 0 2px #a5b4fc; /* ring-indigo-300 */ }
-              .dark .input-style:focus { border-color: #818cf8; /* indigo-400 */ box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5); /* ring-indigo-400 */ }
-              .input-style:disabled { cursor: not-allowed; background-color: #f3f4f6; /* gray-100 */ color: #9ca3af; /* gray-400 */ }
-              .dark .input-style:disabled { background-color: #1f2937; /* gray-800 */ color: #6b7280; /* gray-500 */ }
-              textarea.input-style { min-height: 70px; }
-       `}</style>
+      {/* Estilos */}
+      <style>{`.action-button { padding: 0.25rem; border-radius: 9999px; transition: background-color 0.15s ease-in-out; } .action-button:hover { background-color: rgba(128, 128, 128, 0.1); } .dark .action-button:hover { background-color: rgba(255, 255, 255, 0.1); } .input-style { display: block; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.375rem; border-width: 1px; border-color: #d1d5db; box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05); background-color: white; color: #1f2937; } .dark .input-style { background-color: #374151; border-color: #4b5563; color: #f3f4f6; } .input-style::placeholder { color: #9ca3af; } .dark .input-style::placeholder { color: #6b7280; } .input-style:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #6366f1; box-shadow: 0 0 0 2px #a5b4fc; } .dark .input-style:focus { border-color: #818cf8; box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5); } .input-style:disabled { cursor: not-allowed; background-color: #f3f4f6; color: #9ca3af; } .dark .input-style:disabled { background-color: #1f2937; color: #6b7280; } textarea.input-style { min-height: 70px; }`}</style>
     </div>
   );
 }

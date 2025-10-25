@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.db.models import Q # Para consultas OR
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated, BasePermission # Import BasePermission
+from rest_framework.permissions import IsAuthenticated # Quita BasePermission si no se usa directamente
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.permissions import (
@@ -10,29 +10,28 @@ from users.permissions import (
     CanApproveAsManager, CanApproveAsPurchasing
 )
 from auditing.models import ActivityLog
-from .models import Requisicion, RequisicionItem # Asegúrate de importar RequisicionItem si no estaba
+from .models import Requisicion # Asegúrate que RequisicionItem no se importe si no se usa aquí
 from .serializers import RequisicionSerializer
 from django.utils import timezone
 from django.contrib.auth.models import User # Para buscar usuarios
 
 class RequisicionViewSet(viewsets.ModelViewSet):
     serializer_class = RequisicionSerializer
-    permission_classes = [IsAuthenticated] # Permiso base, se refina en get_queryset y acciones
+    permission_classes = [IsAuthenticated] # Permiso base
 
     def get_queryset(self):
         user = self.request.user
 
-        # Manejo de caso si el usuario no tiene perfil (debería tenerlo, pero por seguridad)
+        # Manejo de caso si el usuario no tiene perfil
         if not hasattr(user, 'profile'):
-             # Decide qué hacer: ¿no mostrar nada? ¿lanzar error?
-             # Por ahora, devolvemos un queryset vacío.
              return Requisicion.objects.none()
 
-        # Los administradores ven todo
+        # 1. ADMIN ve todo
         if user.profile.roles.filter(name='ADMIN').exists():
             return Requisicion.objects.all().order_by('-fecha_creacion', '-id')
 
-        # Usuarios de Compras (Administracion) ven PENDientes de COMPRAS, APROBADAS y RECHAZADAS
+        # 2. ADMINISTRACION (Comercial en este flujo) ve las PENDientes de COMPRAS
+        #    y también las ya APROBADAS o RECHAZADAS (para historial)
         if user.profile.roles.filter(name='ADMINISTRACION').exists():
             return Requisicion.objects.filter(
                 Q(status='PENDING_PURCHASING') |
@@ -40,43 +39,72 @@ class RequisicionViewSet(viewsets.ModelViewSet):
                 Q(status='REJECTED')
             ).order_by('-fecha_creacion', '-id')
 
-        # Query base: requisiciones creadas por el usuario
-        my_requisitions = Q(creado_por=user)
+        # 3. JEFE DIRECTO (Manager)
+        #    Ve las que tiene asignadas para aprobar (PENDING_MANAGER)
+        #    y también las que él mismo creó (para seguimiento).
+        requisitions_pending_my_approval = Q(approver_assigned=user, status='PENDING_MANAGER')
+        my_own_requisitions = Q(creado_por=user) # El creador siempre ve las suyas
 
-        # Query adicional: requisiciones pendientes de la aprobación de este usuario (si es manager)
-        pending_my_approval = Q(approver_assigned=user, status='PENDING_MANAGER')
+        # Verificamos si el usuario actual es jefe de alguien (tiene 'subordinates')
+        # Esto es para que un jefe vea las requisiciones PENDientes de JEFE creadas por sus subordinados,
+        # incluso si la lógica de asignación automática falló o no está implementada.
+        # Es una capa extra de visibilidad para managers.
+        subordinate_ids = user.subordinates.values_list('user__id', flat=True) # Obtiene IDs de usuarios subordinados
+        requisitions_from_my_subordinates_pending = Q(creado_por_id__in=subordinate_ids, status='PENDING_MANAGER')
 
-        # Combinamos: El usuario ve las suyas + las que tiene pendientes de aprobar
-        queryset = Requisicion.objects.filter(my_requisitions | pending_my_approval).distinct().order_by('-fecha_creacion', '-id')
+        # Combinamos: El jefe ve las suyas + las que tiene asignadas + las pendientes de sus subordinados
+        # Los usuarios normales (que no son Jefes ni de Administración) solo verán las suyas.
+        queryset = Requisicion.objects.filter(
+            my_own_requisitions | requisitions_pending_my_approval | requisitions_from_my_subordinates_pending
+        ).distinct().order_by('-fecha_creacion', '-id')
+
         return queryset
 
+
     def perform_create(self, serializer):
-        # El serializer y el modelo manejan la asignación inicial
-        serializer.save()
+        # La lógica de asignación inicial del jefe (approver_assigned)
+        # ya está en el método save() del modelo Requisicion.
+        # Guardamos pasando el usuario actual al contexto del serializador.
+        serializer.save(creado_por=self.request.user) # Aseguramos que creado_por se asigne
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, (IsAdministracionUser | IsAdminUser)])
+    def all_requisitions(self, request):
+        """
+        Devuelve todas las requisiciones. Solo accesible por Admin y Administración.
+        """
+        queryset = Requisicion.objects.all().order_by('-fecha_creacion', '-id')
+        # Aplicar paginación estándar si se desea, o devolver todo
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, CanApproveAsManager | IsAdminUser]) # Admin también puede aprobar por jefe
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, CanApproveAsManager | IsAdminUser])
     def approve_manager(self, request, pk=None):
-        requisicion = self.get_object() # Obtiene la requisición usando pk
+        requisicion = self.get_object()
         user = request.user
 
-        # Doble chequeo (aunque el permiso ya lo hace)
         if requisicion.status != 'PENDING_MANAGER':
             return Response({'error': 'Esta requisición no está pendiente de aprobación del jefe.'}, status=status.HTTP_400_BAD_REQUEST)
-        # El permiso CanApproveAsManager ya valida que request.user sea el approver_assigned
+
+        # El permiso CanApproveAsManager valida que request.user sea el approver_assigned O el creador sea subordinado.
+        # Ajustaremos CanApproveAsManager si es necesario.
 
         requisicion.approved_by_manager = user
         requisicion.manager_approval_date = timezone.now()
-        requisicion.status = 'PENDING_PURCHASING'
-        requisicion.approver_assigned = None # Limpiamos, ahora cualquier de compras puede tomarla
+        requisicion.status = 'PENDING_PURCHASING' # <-- CORRECTO: Cambia a Pendiente Compras
+        requisicion.approver_assigned = None # <-- CORRECTO: Limpiamos, ahora es para Administración/Comercial
 
         requisicion.save()
         ActivityLog.objects.create(user=user, action="Approve Manager Requisicion", details=f"Requisición {requisicion.folio} aprobada por jefe.")
-        # Devolvemos la requisición actualizada
         serializer = self.get_serializer(requisicion)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+    # Las acciones approve_purchasing, reject y perform_destroy pueden permanecer igual
+    # ... (resto de las acciones approve_purchasing, reject, perform_destroy) ...
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, CanApproveAsPurchasing | IsAdminUser])
     def approve_purchasing(self, request, pk=None):
         requisicion = self.get_object()
@@ -84,7 +112,7 @@ class RequisicionViewSet(viewsets.ModelViewSet):
 
         if requisicion.status != 'PENDING_PURCHASING':
             return Response({'error': 'Esta requisición no está pendiente de aprobación de compras.'}, status=status.HTTP_400_BAD_REQUEST)
-        # El permiso CanApproveAsPurchasing valida el rol del usuario
+        # El permiso CanApproveAsPurchasing valida el rol del usuario (ADMINISTRACION)
 
         requisicion.approved_by_purchasing = user
         requisicion.purchasing_approval_date = timezone.now()
@@ -101,34 +129,41 @@ class RequisicionViewSet(viewsets.ModelViewSet):
     def reject(self, request, pk=None):
         requisicion = self.get_object()
         user = request.user
-        reason = request.data.get('rejection_reason', None) # Cambiado el nombre del campo esperado
+        reason = request.data.get('rejection_reason', None)
 
-        # Validar que se proporcionó un motivo
         if not reason:
              return Response({'error': 'Se requiere un motivo de rechazo (campo: rejection_reason).'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validar que el estado permite rechazo
         if requisicion.status not in ['PENDING_MANAGER', 'PENDING_PURCHASING']:
              return Response({'error': 'Esta requisición no se puede rechazar en su estado actual.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Determinar quién rechaza para registrar correctamente
+        rejected_by_role = "desconocido"
+        if CanApproveAsManager().has_object_permission(request, self, requisicion):
+            rejected_by_role = "Jefe Directo"
+        elif CanApproveAsPurchasing().has_object_permission(request, self, requisicion):
+             rejected_by_role = "Compras"
+        elif IsAdminUser().has_permission(request, self):
+             rejected_by_role = "Admin"
+
 
         requisicion.status = 'REJECTED'
         requisicion.rejection_reason = reason
         requisicion.approver_assigned = None # Flujo terminado
-        # Guardamos quién rechazó y cuándo
-        # Por ahora, el ActivityLog lo registra.
+        # Podríamos añadir campos para saber quién rechazó y cuándo si fuera necesario
+        # requisicion.rejected_by = user
+        # requisicion.rejection_date = timezone.now()
         requisicion.save()
 
         ActivityLog.objects.create(
             user=user,
             action="Reject Requisicion",
-            details=f"Requisición {requisicion.folio} rechazada por {user.username}. Motivo: {reason}"
+            details=f"Requisición {requisicion.folio} rechazada por {user.username} ({rejected_by_role}). Motivo: {reason}"
         )
         serializer = self.get_serializer(requisicion)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # El perform_destroy se mantiene igual
     def perform_destroy(self, instance):
-
         ActivityLog.objects.create(
             user=self.request.user,
             action="Delete Requisicion",

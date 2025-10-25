@@ -67,13 +67,13 @@ class CanApproveAsManager(BasePermission):
 
 class CanApproveAsPurchasing(BasePermission):
     """
-    Permite aprobar/rechazar si el usuario tiene rol ADMINISTRACION (o COMPRAS)
+    Permite aprobar/rechazar si el usuario tiene rol COMPRAS (antes ADMINISTRACION)
     y el estado es PENDING_PURCHASING.
     """
     def has_object_permission(self, request, view, obj):
         has_purchasing_role = (
             request.user.is_authenticated and
             hasattr(request.user, 'profile') and
-            request.user.profile.roles.filter(name='ADMINISTRACION').exists()
+            request.user.profile.roles.filter(name='COMPRAS').exists() 
         )
         return has_purchasing_role and obj.status == 'PENDING_PURCHASING'

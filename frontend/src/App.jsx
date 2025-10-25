@@ -15,7 +15,7 @@ import TIDashboard from "./pages/modules/TIDashboard";
 import UnebiKeyManagement from "./pages/unebi/UnebiKeyManagement";
 import AdministracionDashboard from "./pages/modules/AdministracionDashboard";
 import Requisiciones from "./pages/administracion/Requisiciones";
-
+import RequisicionesTodas from "./pages/administracion/RequisicionesTodas";
 function Logout() {
   localStorage.clear();
   return <Navigate to="/login" />;
@@ -70,12 +70,30 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/administracion/requisiciones/todas"
+          element={
+            <ProtectedRoute allowedRoles={["ADMINISTRACION", "ADMIN"]}>
+              <MainLayout>
+                <RequisicionesTodas /> {/* Renderiza el nuevo componente */}
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Ruta para el Módulo de Requisiciones */}
         <Route
           path="/administracion/requisiciones"
           element={
-            <ProtectedRoute allowedRoles={["ADMINISTRACION", "ADMIN"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "ADMINISTRACION",
+                "ADMIN",
+                "COMERCIAL",
+                "CLINICA",
+                "TI",
+              ]}
+            >
               <MainLayout>
                 <Requisiciones />
               </MainLayout>

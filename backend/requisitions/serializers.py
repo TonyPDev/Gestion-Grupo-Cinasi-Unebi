@@ -15,40 +15,47 @@ class RequisicionItemSerializer(serializers.ModelSerializer):
 
 
 class RequisicionSerializer(serializers.ModelSerializer):
-    items = RequisicionItemSerializer(many=True, required=True) # Hacemos items obligatorios al crear/actualizar (PUT)
+    items = RequisicionItemSerializer(many=True, required=True)
     creado_por_username = serializers.CharField(source='creado_por.username', read_only=True)
-    # NUEVO: Campos de solo lectura para mostrar información útil
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+
     approver_assigned_username = serializers.CharField(source='approver_assigned.username', read_only=True, allow_null=True)
     approved_by_manager_username = serializers.CharField(source='approved_by_manager.username', read_only=True, allow_null=True)
     approved_by_purchasing_username = serializers.CharField(source='approved_by_purchasing.username', read_only=True, allow_null=True)
 
-    # Campo para obtener el ID del usuario actual para validaciones/frontend
+    approver_assigned_full_name = serializers.CharField(source='approver_assigned.profile.full_name', read_only=True, allow_null=True, default='')
+    approved_by_manager_full_name = serializers.CharField(source='approved_by_manager.profile.full_name', read_only=True, allow_null=True, default='')
+    approved_by_purchasing_full_name = serializers.CharField(source='approved_by_purchasing.profile.full_name', read_only=True, allow_null=True, default='')
+    creado_por_full_name = serializers.CharField(source='creado_por.profile.full_name', read_only=True, allow_null=True, default='')
+
     current_user_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Requisicion
         fields = [
             'id', 'folio', 'fecha_solicitud', 'tipo_requisicion', 'justificacion',
-            'nombre_solicitante',
-            'creado_por', 'creado_por_username', 'fecha_creacion', 'items',
-            # NUEVOS CAMPOS AÑADIDOS
-            'status', 'status_display', 'approver_assigned', 'approver_assigned_username',
-            'approved_by_manager', 'approved_by_manager_username', 'manager_approval_date',
-            'approved_by_purchasing', 'approved_by_purchasing_username', 'purchasing_approval_date',
+            'nombre_solicitante', # Nombre escrito por el usuario
+            'creado_por', 'creado_por_username', 'creado_por_full_name', # Datos del creador real
+            'fecha_creacion', 'items',
+            'status', 'status_display',
+            'approver_assigned', 'approver_assigned_username', 'approver_assigned_full_name', # Aprobador actual
+            'approved_by_manager', 'approved_by_manager_username', 'approved_by_manager_full_name', # Aprobador Jefe
+            'manager_approval_date',
+            'approved_by_purchasing', 'approved_by_purchasing_username', 'approved_by_purchasing_full_name', # Aprobador Compras
+            'purchasing_approval_date',
             'rejection_reason',
-            'current_user_id' # Añadido
+            'current_user_id'
         ]
-        # Campos que el frontend no debe poder enviar directamente al crear/actualizar
         read_only_fields = [
             'folio', 'creado_por', 'fecha_creacion',
-            'status', # El estado se maneja por acciones
-            'status_display',
-            'approver_assigned', 'approver_assigned_username', # Asignado automáticamente
-            'approved_by_manager', 'approved_by_manager_username', 'manager_approval_date',
-            'approved_by_purchasing', 'approved_by_purchasing_username', 'purchasing_approval_date',
-            'creado_por_username',
-            'rejection_reason', # Se establece solo en la acción de rechazar
+            'status', 'status_display',
+            'approver_assigned', 'approver_assigned_username', 'approver_assigned_full_name', # Asignado automáticamente
+            'approved_by_manager', 'approved_by_manager_username', 'approved_by_manager_full_name', # Datos aprobación Jefe
+            'manager_approval_date',
+            'approved_by_purchasing', 'approved_by_purchasing_username', 'approved_by_purchasing_full_name', # Datos aprobación Compras
+            'purchasing_approval_date',
+            'creado_por_username', 'creado_por_full_name', # Datos del creador
+            'rejection_reason',
             'current_user_id'
         ]
         # 'approver_assigned' y otros campos relacionados con la aprobación se quitan de read_only_fields
@@ -56,7 +63,6 @@ class RequisicionSerializer(serializers.ModelSerializer):
 
 
     def get_current_user_id(self, obj):
-        # Devuelve el ID del usuario que hace la solicitud
         request = self.context.get('request', None)
         if request and hasattr(request, "user"):
             return request.user.id
