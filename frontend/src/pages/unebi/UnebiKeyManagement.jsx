@@ -164,10 +164,8 @@ function UnebiKeyManagement() {
     page * rowsPerPage + rowsPerPage
   );
 
-  const canCreate =
-    role.includes("COMERCIAL") || role.includes("TI") || role.includes("ADMIN");
-  const canDelete =
-    role.includes("COMERCIAL") || role.includes("TI") || role.includes("ADMIN");
+  const canCreate = role.includes("COMERCIAL") || role.includes("ADMIN");
+  const canDelete = role.includes("COMERCIAL") || role.includes("ADMIN");
 
   const displayColumns = ALL_COLUMNS.filter((col) => visibleColumns[col.id]);
 
