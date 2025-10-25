@@ -26,7 +26,7 @@ function Requisiciones() {
   }, []);
   const fetchRequisiciones = () => {
     api
-      .get("/api/requisitions/requisiciones/")
+      .get("/api/requisitions/requisitions/")
       .then((res) => setRequisiciones(res.data))
       .catch((err) => console.error("Error fetching requisiciones:", err));
   };
@@ -84,10 +84,10 @@ function Requisiciones() {
     };
     const apiCall = currentRequisicion
       ? api.patch(
-          `/api/requisitions/requisiciones/${currentRequisicion.id}/`,
+          `/api/requisitions/requisitions/${currentRequisicion.id}/`,
           dataToSubmit
         )
-      : api.post("/api/requisitions/requisiciones/", dataToSubmit);
+      : api.post("/api/requisitions/requisitions/", dataToSubmit);
     apiCall
       .then(() => {
         alert(
@@ -125,7 +125,7 @@ function Requisiciones() {
   const handleDelete = (id) => {
     if (window.confirm("¿Estás seguro de eliminar esta requisición?")) {
       api
-        .delete(`/api/requisitions/requisiciones/${id}/`)
+        .delete(`/api/requisitions/requisitions/${id}/`)
         .then(() => {
           alert("Requisición eliminada.");
           fetchRequisiciones();
