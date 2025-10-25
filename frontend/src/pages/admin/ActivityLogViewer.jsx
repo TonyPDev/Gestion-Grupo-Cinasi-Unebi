@@ -16,7 +16,7 @@ function ActivityLogViewer() {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    let url = "/api/activity-logs/";
+    let url = "/api/auditing/activity-logs/";
     if (filter) {
       url += `?action=${encodeURIComponent(filter)}`;
     }

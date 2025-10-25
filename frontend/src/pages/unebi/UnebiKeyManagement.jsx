@@ -80,7 +80,7 @@ function UnebiKeyManagement() {
 
   const getUnebiKeys = () => {
     api
-      .get("/api/unebikeys/")
+      .get("/api/unebi/unebikeys/")
       .then((res) => setUnebiKeys(res.data))
       .catch((err) => alert("Error al obtener las claves UNEBI: " + err));
   };
@@ -103,7 +103,7 @@ function UnebiKeyManagement() {
       window.confirm("¿Estás seguro de que quieres eliminar esta clave UNEBI?")
     ) {
       api
-        .delete(`/api/unebikeys/${keyId}/`)
+        .delete(`/api/unebi/unebikeys/${keyId}/`)
         .then(() => {
           alert("¡Clave UNEBI eliminada exitosamente!");
           getUnebiKeys();

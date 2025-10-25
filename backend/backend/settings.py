@@ -58,6 +58,10 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'corsheaders',
+    'users',
+    'unebi',
+    'requisitions',
+    'auditing',
 ]
 
 MIDDLEWARE = [
