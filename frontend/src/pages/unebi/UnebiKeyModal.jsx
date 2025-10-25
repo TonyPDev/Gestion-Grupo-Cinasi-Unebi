@@ -96,10 +96,10 @@ const UnebiKeyModal = ({
     }
 
     const apiCall = unebiKey
-      ? api.patch(`/api/unebikeys/${unebiKey.id}/`, dataToSend, {
+      ? api.patch(`/api/unebi/unebikeys/${unebiKey.id}/`, dataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         })
-      : api.post("/api/unebikeys/", dataToSend, {
+      : api.post("/api/unebi/unebikeys/", dataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
