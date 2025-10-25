@@ -15,7 +15,14 @@ import { ACCES_TOKEN, REFRESH_TOKEN } from "../../constants";
 import logo from "../../assets/grupo-cinasi-logo.webp";
 import { ThemeContext } from "../../context/ThemeContext"; // Importa el ThemeContext
 
-const roleOptions = ["CLINICA", "ADMINISTRACION", "COMERCIAL", "TI", "ADMIN"];
+const roleOptions = [
+  "CLINICA",
+  "ADMINISTRACION",
+  "COMERCIAL",
+  "TI",
+  "ADMIN",
+  "COMPRAS",
+];
 
 function Form({ route, method }) {
   const [username, setUsername] = useState("");

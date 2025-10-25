@@ -30,14 +30,14 @@ media/
 .env
 .env.local
 .env.*.local
-
+__pycache__/
+*.pyc
 # =================================================================
 # Frontend (Node.js / React / Vite)
 # =================================================================
 # Dependencias
 node_modules
 package-lock.json
-package.json
 
 /frontend/node_modules/
 
