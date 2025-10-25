@@ -20,7 +20,6 @@ import {
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import miLogo from "../../assets/logo_cinasi_pdf.png";
-
 // Componente StatusBadge
 const StatusBadge = ({ status }) => {
   let bgColor = "bg-gray-100 dark:bg-gray-700";
@@ -173,7 +172,7 @@ const DetailsModal = ({ requisicion, onClose }) => {
                 ? "Pendiente Compras"
                 : requisicion.status === "APPROVED" ||
                   requisicion.status === "REJECTED"
-                ? "--"
+                ? "Compras"
                 : "N/A"}
             </p>
           </div>
@@ -1209,8 +1208,7 @@ function Requisiciones() {
                       const canApprovePurchasing =
                         req.status === "PENDING_PURCHASING" &&
                         userRoles &&
-                        (userRoles.includes("ADMINISTRACION") ||
-                          userRoles.includes("COMPRAS")); // Ajusta si usas rol COMPRAS
+                        userRoles.includes("COMPRAS"); // Ajusta si usas rol COMPRAS
                       const canReject =
                         canApproveManager || canApprovePurchasing;
                       const canEdit =
@@ -1245,12 +1243,18 @@ function Requisiciones() {
                             <StatusBadge status={req.status} />
                           </td>
                           <td className="p-3 whitespace-nowrap">
-                            {" "}
-                            {req.approver_assigned_full_name ||
-                            req.approver_assigned_username
-                              ? req.approver_assigned_full_name ||
-                                `@${req.approver_assigned_username}`
-                              : "--"}{" "}
+                            {/* MODIFICATION START */}
+                            {req.status === "PENDING_PURCHASING" ? (
+                              <span className="text-gray-500 dark:text-gray-400 italic">
+                                Compras
+                              </span>
+                            ) : req.approver_assigned_full_name ||
+                              req.approver_assigned_username ? (
+                              req.approver_assigned_full_name ||
+                              `@${req.approver_assigned_username}`
+                            ) : (
+                              "--"
+                            )}
                           </td>
                           <td className="p-3 text-center">
                             {" "}
