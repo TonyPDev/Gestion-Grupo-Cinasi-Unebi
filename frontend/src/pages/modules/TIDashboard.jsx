@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { KeySquare, Settings } from "lucide-react";
-import { KeySquare, Settings } from "lucide-react";
 
 function TIDashboard() {
   return (
