@@ -17,7 +17,7 @@ venv/
 env/
 ENV/
 __pycache__/
-/backend/backend/__pycache__
+
 # Django
 *.log
 db.sqlite3
