@@ -115,6 +115,7 @@ const UnebiKeyModal = ({
 
   const isFieldDisabled = (fieldName) => {
     const comercialFields = [
+      "elaborador",
       "tipo_estudio",
       "principio_activo",
       "fecha_solicitud",
@@ -124,6 +125,7 @@ const UnebiKeyModal = ({
       "patrocinador",
       "observaciones",
       "segmento_contable",
+      "fecha",
     ];
     const clinicaFields = [
       "condicion",
@@ -133,9 +135,18 @@ const UnebiKeyModal = ({
       "llave_pago_cofepris",
       "no_cofepris",
       "observaciones",
+      "diseno",
+      "tamano_muestras",
     ];
-
-    if (userRole.includes("TI") || userRole.includes("ADMIN")) return false;
+    const administracionFields = [
+      "no_cofepris",
+      "fecha_cofepris",
+      "llave_pago_cofepris",
+      "fecha_pago_ip",
+      "fecha_pago_comite",
+      "segmento_contable",
+    ];
+    if (userRole.includes("ADMIN")) return false;
 
     if (!unebiKey) {
       if (userRole.includes("COMERCIAL")) {
@@ -148,6 +159,11 @@ const UnebiKeyModal = ({
     if (userRole.includes("COMERCIAL") && comercialFields.includes(fieldName))
       isDisabled = false;
     if (userRole.includes("CLINICA") && clinicaFields.includes(fieldName))
+      isDisabled = false;
+    if (
+      userRole.includes("ADMINISTRACION") &&
+      administracionFields.includes(fieldName)
+    )
       isDisabled = false;
 
     return isDisabled;
