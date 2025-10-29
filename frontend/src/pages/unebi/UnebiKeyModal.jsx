@@ -93,6 +93,9 @@ const UnebiKeyModal = ({
 
     for (const key in finalData) {
       if (key === "historial") continue;
+      if (finalData[key] !== null && finalData[key] !== undefined) {
+        dataToSend.append(key, finalData[key]);
+      }
     }
 
     const apiCall = unebiKey
