@@ -437,7 +437,26 @@ function Requisiciones() {
 
   // --- Cargar datos para Editar ---
   const handleEdit = (req) => {
-    // No necesita validación aquí, se controla por visibilidad del botón
+    // Comprueba el estado de la requisición ANTES de abrir el formulario.
+    // Esto previene la edición si el estado cambió (ej. fue aprobada)
+    // y el usuario no ha refrescado la página.
+    if (req.status !== "PENDING_MANAGER" && req.status !== "REJECTED") {
+      alert(
+        "Esta requisición ya no puede ser editada porque ha sido aprobada o está en un proceso posterior."
+      );
+
+      fetchRequisiciones();
+
+      return; // Detiene la ejecución y no abre el formulario
+    }
+
+    // Opcional: También puedes validar que el usuario sea el creador,
+    // aunque la visibilidad del botón ya lo haga.
+    if (req.creado_por !== loggedInUserId) {
+      alert("No tienes permiso para editar esta requisición.");
+      fetchRequisiciones();
+      return;
+    }
     setCurrentRequisicion(req);
     const formatDate = (dateString) =>
       dateString ? new Date(dateString).toISOString().split("T")[0] : "";
