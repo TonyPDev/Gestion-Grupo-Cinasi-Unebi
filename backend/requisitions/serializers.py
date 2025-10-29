@@ -118,11 +118,17 @@ class RequisicionSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Restricción opcional: Solo permitir editar si está en Borrador o Rechazada
-        # if instance.status not in ['DRAFT', 'REJECTED']:
-        #    raise serializers.ValidationError({
-        #        "detail": "No se puede modificar una requisición que está en proceso o ya fue aprobada."
-        #    })
+        if instance.status not in ['PENDING_MANAGER', 'REJECTED']:
+           raise serializers.ValidationError({
+               "detail": "No se puede modificar una requisición aprobada, por favor refresca la página"
+           })
 
+        user = self.context['request'].user
+        if instance.creado_por != user:
+             raise serializers.ValidationError({
+                 "detail": "No tienes permiso para editar esta requisición."
+             })
+        
         items_data = validated_data.pop('items', None)
         user = self.context['request'].user
 
